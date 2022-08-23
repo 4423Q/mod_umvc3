@@ -10,7 +10,7 @@ But fret not, the feature has lain dormant in the game for all this time, waitin
 
 1. Make sure you've got [the Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader/) installed in your marvel 3 folder.
 
-2. Grab mod_enable_damage_counter.asi from the releases page (TODO)
+2. Go to the [latest release page](https://github.com/4423Q/mod_umvc3/releases/latest) and download `mod_enable_damage_counter.asi`.
 
 3. plop it in your marvel folder
 
