@@ -1,5 +1,7 @@
 # Enable Damage Counter
 
+![screenshot of ultimate marvel vs capcom 3 with a damage counter below the combo counter](./img/img00.png)
+
 In the early footage of Marvel vs Capcom 3: Fate of Two Great Buddies, there was a little number under the combo counter that kept track of the current combo damage.
 
 "That's sick as hell", a young sheep thought to himself, but alas, when the game was released this number was nowhere to be found.
