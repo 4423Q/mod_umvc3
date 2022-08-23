@@ -8,7 +8,7 @@ But fret not, the feature has lain dormant in the game for all this time, waitin
 
 ## Usage
 
-1. Make sure you've got [the Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader/) installed in your marvel 3 folder. (If you have the colour expansion kit mod you already have this, if not go read their readme x64 dinput8.dll seems to work fine with marvel)
+1. Make sure you've got [the Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader/) installed in your marvel 3 folder. (If you have the colour expansion kit mod you already have this, if not go read the readme, x64 dinput8.dll seems to work fine with marvel)
 
 2. Go to the [latest release page](https://github.com/4423Q/mod_umvc3/releases/latest) and download `mod_enable_damage_counter.asi`.
 
