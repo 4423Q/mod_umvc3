@@ -89,7 +89,7 @@ void SimulateFrame(sMvc3Main* mvc3Main, int full) {
         Update48(mvc3Main->mpGpuParticle);
         ((void* (__fastcall*)(void*))_addr(0x140537080))(mvc3Main->mpRender);
 
-        ((void* (__fastcall*)(void*))mvc3Main->mpArea->vtable->update)(mvc3Main->mpArea);
+        Update30(mvc3Main->mpArea);
     }
 
     manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
@@ -97,8 +97,8 @@ void SimulateFrame(sMvc3Main* mvc3Main, int full) {
 
     if (full == 1) {
         // Keyboards and mousesies
-        ((void* (__fastcall*)(void*))mvc3Main->mpVibration->vtable->update)(mvc3Main->mpVibration);
-        ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update)(mvc3Main->mpNetPad);
+        Update30(mvc3Main->mpVibration);
+        Update30(mvc3Main->mpNetPad);
         Update30(mvc3Main->mpId);
         Update30(mvc3Main->mpKeyboard);
         Update50(mvc3Main->mpNetPad);
@@ -246,7 +246,7 @@ void OnInitializeHook()
     Patch(_addr(0x14051dfac), 0x48);
     Patch(_addr(0x14051dfad), 0x8b);
     Patch(_addr(0x14051dfae), 0xcf);
-    InjectHook(_addr(0x14051dfaf), tramp->Jump(HookRenderFunction), PATCH_CALL); // DOn't forget to copy across the assignment to RCX
+    InjectHook(_addr(0x14051dfaf), tramp->Jump(HookRenderFunction), PATCH_CALL);
     Nop(_addr(0x14051dfb4), 1);
     
 }
