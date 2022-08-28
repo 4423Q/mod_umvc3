@@ -47,52 +47,82 @@ struct sShot {
     sShot_vtable* vtable;
 };
 
-struct sMvc3Manager {
-    pointer vtable;
+struct sMvc3Manager_vtable {
     char pad[0x30];
-    pointer mpMvc3Setting;
-    pointer mpBattleSetting;
-    pointer mpAction;
-    pointer mpCharacter;
-    pointer mpStage;
-    pointer mpGameEffect;
+    void* update;
+};
+
+struct Updatable_vtable {
+    char pad[0x30];
+    void* update;
+    char pad_[0x10];
+    void* update2;
+    void* update50;
+};
+
+struct Updatable {
+    Updatable_vtable* vtable;
+};
+ 
+struct sMvc3Manager {
+    sMvc3Manager_vtable * vtable;
+    char pad[0x30];
+    Updatable* mpMvc3Setting;
+    Updatable* mpBattleSetting;
+    Updatable* mpAction;
+    Updatable* mpCharacter;
+    Updatable* mpStage;
+    Updatable* mpGameEffect;
     sShot* mpShot;
     sHitSolver* mpHitSolver;
+    Updatable* mpGameConfig;
+    Updatable* mpGameUi;
+    Updatable* mpGSound;
+    Updatable* mpReplay;
+    Updatable* mpRanking;
+    Updatable* mpMission;
+    Updatable* mpLicense;
+    Updatable* mpNetwork;
+    Updatable* mpNetworkRoom;
+    Updatable* mpMovie;
+    Updatable* mpEarthAttack;
 };
+
+
 
 
 struct sMvc3Main {
     char sMain [0x40090];
     char field1_0x40090[256];
-    void * mpRender; /* Created by retype action */
-    void * mpTool; /* Created by retype action */
+    Updatable* mpRender; /* Created by retype action */
+    Updatable * mpTool; /* Created by retype action */
     sUnit * mpUnit; /* Created by retype action */
-    void * mpResource; /* Created by retype action */
-    void * mpCamera; /* Created by retype action */
-    pointer mpNetwork; /* Created by retype action */
-    pointer mpNetPad; /* Created by retype action */
-    pointer mpAgent; /* Created by retype action */
-    pointer mpGuide; /* Created by retype action */
-    pointer mpEffect; /* Created by retype action */
+    Updatable * mpResource; /* Created by retype action */
+    Updatable * mpCamera; /* Created by retype action */
+    Updatable* mpNetwork; /* Created by retype action */
+    Updatable* mpNetPad; /* Created by retype action */
+    Updatable* mpAgent; /* Created by retype action */
+    Updatable* mpGuide; /* Created by retype action */
+    Updatable * mpEffect; /* Created by retype action */
    sCollision * mpCollision; /* Created by retype action */
-    pointer mpShader2; /* Created by retype action */
-    pointer mpSound; /* Created by retype action */
-    pointer mpCapture; /* Created by retype action */
-    pointer mpArea; /* Created by retype action */
-    pointer mpGpuParticle; /* Created by retype action */
-    pointer mpMouse; /* Created by retype action */
-    pointer mpKeyboard; /* Created by retype action */
+    Updatable* mpShader2; /* Created by retype action */
+    Updatable * mpSound; /* Created by retype action */
+    Updatable* mpCapture; /* Created by retype action */
+    Updatable* mpArea; /* Created by retype action */
+    Updatable* mpGpuParticle; /* Created by retype action */
+    Updatable* mpMouse; /* Created by retype action */
+    Updatable* mpKeyboard; /* Created by retype action */
     pointer field20_0x40220;
-    pointer mpId; /* Created by retype action */
-    pointer mpVibration; /* Created by retype action */
+    Updatable* mpId; /* Created by retype action */
+    Updatable* mpVibration; /* Created by retype action */
     pointer field23_0x40238;
-    pointer mpAI; /* Created by retype action */
-    pointer mpScene; /* Created by retype action */
+    Updatable* mpAI; /* Created by retype action */
+    Updatable *  mpScene; /* Created by retype action */
     pointer mpOccluder; /* Created by retype action */
-    pointer mpShadow; /* Created by retype action */
-    pointer mpPlatformUtil; /* Created by retype action */
+    Updatable * mpShadow; /* Created by retype action */
+    Updatable * mpPlatformUtil; /* Created by retype action */
     pointer field29_0x40268;
-    pointer mpPrimitive; /* Created by retype action */
+    Updatable * mpPrimitive; /* Created by retype action */
     pointer mpSyncPoint; /* Created by retype action */
     char field32_0x40280[53];
     char is_foreground; /* Created by retype action */
@@ -100,4 +130,3 @@ struct sMvc3Main {
     char field35_0x402b7[33];
     pointer mpMvc3Manager; /* Created by retype action */
 };
-
