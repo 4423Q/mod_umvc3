@@ -21,22 +21,6 @@ bool CheckGame()
     }
 }
 
-struct BattleSetup {
-    char pad[0x370];
-    std::byte battle_ui_disp;
-    std::byte input_key_disp;
-    std::byte finish_picture_save;
-    std::byte replay_use;
-    std::byte damage_disp;
-};
-
-BattleSetup* HookBattleSetup(BattleSetup* param)
-{
-    BattleSetup* battle_setup = ((BattleSetup * (__fastcall*)(BattleSetup*))_addr(0x14024af90))(param);
-    battle_setup->damage_disp = (std::byte)0x1;
-    return battle_setup;
-}
-
 void Update30(Updatable * updatable) {
     ((void* (__fastcall*)(void*))updatable->vtable->update)(updatable);
 }
@@ -229,8 +213,6 @@ void SimulateFrame(sMvc3Main* mvc3Main, int full) {
 
 void HookRenderFunction(sMvc3Main* param)
 {
-    sMvc3Manager* manager;
-
 
     SimulateFrame(param, 1);
     //((void* (__fastcall*)(sMvc3Main*))_addr(0x1402594a0))(param);
@@ -242,7 +224,6 @@ void OnInitializeHook()
 {
 
     Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
-    //InjectHook(_addr(0x14024d72f), tramp->Jump(HookBattleSetup), PATCH_JUMP);
     Patch(_addr(0x14051dfac), 0x48);
     Patch(_addr(0x14051dfad), 0x8b);
     Patch(_addr(0x14051dfae), 0xcf);
