@@ -151,6 +151,7 @@
     <ClInclude Include="..\mod_enable_damage_counter\Trampoline.h" />
     <ClInclude Include="..\mod_enable_damage_counter\umvc3utils.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="mvc3_frame_simulation.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="umvc3_sMvc3Main.h" />
   </ItemGroup>
@@ -163,6 +164,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="mvc3_frame_simulation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

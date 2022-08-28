@@ -4,6 +4,7 @@
 #include "umvc3utils.h"
 #include "MemoryMgr.h"
 #include "umvc3_sMvc3Main.h"
+#include "mvc3_frame_simulation.h"
 using namespace Memory::VP;
 
 bool CheckGame()
@@ -241,7 +242,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
         if (CheckGame()) {
-            OnInitializeHook();
+            //OnInitializeHook();
+            Mvc3FrameSimulation::InstallHook();
         }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
