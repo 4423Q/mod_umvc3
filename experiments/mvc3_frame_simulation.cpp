@@ -31,7 +31,7 @@ namespace Mvc3FrameSimulation {
         int unknown2 = 0;
 
         if (full == 1) {
-            ((void* (__fastcall*)(void*))_addr(0x140521df0))(mvc3Main);
+            ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
             ((void* (__fastcall*)(void*))_addr(0x140258540))(mvc3Main);
             ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
             Update30(mvc3Main->mpPlatformUtil);
@@ -70,6 +70,7 @@ namespace Mvc3FrameSimulation {
             // Keyboards and mousesies
             Update30(mvc3Main->mpVibration);
             Update30(mvc3Main->mpNetPad);
+            Update30(mvc3Main->mpMouse);
             Update30(mvc3Main->mpId);
             Update30(mvc3Main->mpKeyboard);
             Update50(mvc3Main->mpNetPad);
@@ -168,7 +169,7 @@ namespace Mvc3FrameSimulation {
 
         if (full == 1) {
 
-            ((void* (__fastcall*)(void*))_addr(0x140259ea0))(mvc3Main); // render menus?
+            ((void* (__fastcall*)(void*))_addr(0x140259ea0))(mvc3Main);
 
             Update30(mvc3Main->mpRender);
             ((void* (__fastcall*)(void*))_addr(0x14053a250))(mvc3Main->mpRender);
