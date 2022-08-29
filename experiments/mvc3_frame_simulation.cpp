@@ -8,6 +8,8 @@ using namespace Memory::VP;
 
 
 namespace Mvc3FrameSimulation {
+    int toggle = 0;
+
     void Update30(Updatable* updatable) {
         ((void* (__fastcall*)(void*))updatable->vtable->update)(updatable);
     }
@@ -20,6 +22,10 @@ namespace Mvc3FrameSimulation {
         ((void* (__fastcall*)(void*))updatable->vtable->update50)(updatable);
     }
 
+    struct Mystery{
+        int unknown;
+        int unknown2;
+    };
 
     void SimulateFrame(sMvc3Main* mvc3Main, int full) {
         //1402594a0
@@ -27,8 +33,7 @@ namespace Mvc3FrameSimulation {
         void* sRender;
         void* sPrimitive;
         void* sPad;
-        int unknown;
-        int unknown2 = 0;
+        Mystery unknown;
 
         if (full == 1) {
             ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
@@ -49,12 +54,12 @@ namespace Mvc3FrameSimulation {
             sRender = ((void* (__fastcall*)())_addr(0x1400047a0))(); // get srender
             ((void* (__fastcall*)(void*, int))_addr(0x14053de60))(sRender, 2);
             sRender = ((void* (__fastcall*)())_addr(0x1400047a0))(); // get srender
-            ((void* (__fastcall*)(void*, int*))_addr(0x14020c7d0))(sRender, &unknown); //Is this right?
+            ((void* (__fastcall*)(void*, void*))_addr(0x14020c7d0))(sRender, &unknown); //Is this right?
 
             sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
-            ((void* (__fastcall*)(void*, int))_addr(0x140932790))(sPrimitive, unknown); //Is this right either?
+            ((void* (__fastcall*)(void*, int))_addr(0x140932790))(sPrimitive, unknown.unknown); //Is this right either?
             sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
-            ((void* (__fastcall*)(void*, int))_addr(0x140447110))(sPrimitive, unknown2); // wtf? 
+            ((void* (__fastcall*)(void*, int))_addr(0x140447110))(sPrimitive, unknown.unknown2); // wtf? 
 
             Update48(mvc3Main->mpPrimitive);
             Update48(mvc3Main->mpGpuParticle);
@@ -132,6 +137,7 @@ namespace Mvc3FrameSimulation {
         }
 
 
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
         ((void* (__fastcall*)(void*))_addr(0x140011320))(manager->mpHitSolver);
 
         if (full == 1) {
@@ -200,10 +206,14 @@ namespace Mvc3FrameSimulation {
 
     void HookRenderFunction(sMvc3Main* param)
     {
-
-        SimulateFrame(param, 1);
-        //((void* (__fastcall*)(sMvc3Main*))_addr(0x1402594a0))(param);
-
+        if (toggle == 1) {
+            SimulateFrame(param, 1);
+            toggle = 0;
+        }
+        else {
+            ((void* (__fastcall*)(sMvc3Main*))_addr(0x1402594a0))(param);
+            toggle = 1;
+        }
         return;
     }
 
