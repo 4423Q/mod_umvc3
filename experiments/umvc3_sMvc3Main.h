@@ -63,6 +63,23 @@ struct Updatable_vtable {
 struct Updatable {
     Updatable_vtable* vtable;
 };
+
+
+struct sMvc3NetPad {
+
+    Updatable_vtable* vtable;
+    char pad[0x50];
+    struct sPad_pad {
+        char vtable[8];
+        char be_flag;
+        char rno;
+        char pad_no;
+        char kind;
+        char ability;
+        char pad[0x224];
+    };
+    sPad_pad mPad[6];
+};
  
 struct sMvc3Manager {
     sMvc3Manager_vtable * vtable;
@@ -100,7 +117,7 @@ struct sMvc3Main {
     Updatable * mpResource; /* Created by retype action */
     Updatable * mpCamera; /* Created by retype action */
     Updatable* mpNetwork; /* Created by retype action */
-    Updatable* mpNetPad; /* Created by retype action */
+    sMvc3NetPad* mpNetPad; /* Created by retype action */
     Updatable* mpAgent; /* Created by retype action */
     Updatable* mpGuide; /* Created by retype action */
     Updatable * mpEffect; /* Created by retype action */

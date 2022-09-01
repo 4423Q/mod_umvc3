@@ -9,7 +9,9 @@ using namespace Memory::VP;
 
 namespace Mvc3FrameSimulation {
     int toggle = 0;
-
+    int toggleMode = 0;
+    int padLifeSupport = 0;
+     
     void Update30(Updatable* updatable) {
         ((void* (__fastcall*)(void*))updatable->vtable->update)(updatable);
     }
@@ -39,6 +41,12 @@ namespace Mvc3FrameSimulation {
             ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
             ((void* (__fastcall*)(void*))_addr(0x140258540))(mvc3Main);
             ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
+            if (padLifeSupport) {
+                for (int i = 0; i < 4; i++) {
+                    mvc3Main->mpNetPad[i].mPad->rno = 1;
+                    mvc3Main->mpNetPad[i].mPad->kind = 4;
+                }
+            }
             Update30(mvc3Main->mpPlatformUtil);
             Update48(mvc3Main->mpResource);
             Update48(mvc3Main->mpTool);
@@ -74,11 +82,11 @@ namespace Mvc3FrameSimulation {
         if (full == 1) {
             // Keyboards and mousesies
             Update30(mvc3Main->mpVibration);
-            Update30(mvc3Main->mpNetPad);
+            ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update)(mvc3Main->mpNetPad);
             Update30(mvc3Main->mpMouse);
             Update30(mvc3Main->mpId);
             Update30(mvc3Main->mpKeyboard);
-            Update50(mvc3Main->mpNetPad);
+            ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update50)(mvc3Main->mpNetPad);
             Update30(mvc3Main->mpShader2);
             Update30(mvc3Main->mpAI);
 
@@ -206,14 +214,29 @@ namespace Mvc3FrameSimulation {
 
     void HookRenderFunction(sMvc3Main* param)
     {
-        if (toggle == 1) {
-            SimulateFrame(param, 1);
-            toggle = 0;
-        }
-        else {
+        switch (toggleMode) {
+        case 0:
             ((void* (__fastcall*)(sMvc3Main*))_addr(0x1402594a0))(param);
-            toggle = 1;
+            return;
+        case 1:
+            SimulateFrame(param, 1);
+            return;
+        case 2:
+            if (toggle == 1) {
+                SimulateFrame(param, 1);
+                toggle = 0;
+            }
+            else {
+                ((void* (__fastcall*)(sMvc3Main*))_addr(0x1402594a0))(param);
+                toggle = 1;
+            }
+            return;
         }
+        return;
+    }
+
+    void setToggleMode(int tm) {
+        toggleMode = tm;
         return;
     }
 
