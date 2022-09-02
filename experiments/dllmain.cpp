@@ -26,7 +26,7 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
         if (line == "go") {
             std::cout << "GO TIME" << std::endl;
             Mvc3FrameSimulation::setToggleMode(1);
-            Mvc3FrameSimulation::setLifeSupport(3, 1);
+            Mvc3FrameSimulation::setFakePad(3, 1);
 
             Mvc3FrameSimulation::setPadToTeam(0, 0);
 

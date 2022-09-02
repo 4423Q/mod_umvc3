@@ -12,7 +12,7 @@ namespace Mvc3FrameSimulation {
     int toggleMode = 0;
     
     struct PadInfo {
-        int lifesupport;
+        int fakepad;
         int teamId;
         int nextInput;
     };
@@ -47,7 +47,7 @@ namespace Mvc3FrameSimulation {
 
     void OnReadInput(sMvc3NetPad* netPad) {
         for (int i = 0; i < 4; i++) {
-            if (padInfo[i].lifesupport) {
+            if (padInfo[i].fakepad) {
                 netPad->mPad[i].kind = 4;
                 netPad->mPad[i].data.On = 0;
                 netPad->mPad[i].data.Chg = 0;
@@ -276,8 +276,8 @@ namespace Mvc3FrameSimulation {
         return;
     }
 
-    void setLifeSupport(int idx, int ls) {
-        padInfo[idx].lifesupport = ls;
+    void setFakePad(int idx, int ls) {
+        padInfo[idx].fakepad = ls;
         return;
     }
 
