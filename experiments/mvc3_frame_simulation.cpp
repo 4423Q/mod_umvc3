@@ -10,14 +10,19 @@ using namespace Memory::VP;
 namespace Mvc3FrameSimulation {
     int toggle = 0;
     int toggleMode = 0;
-    
+    int recordingPad = -1;
+    int recording[60 * 180] = { 0 };
+    int recordingIndex;
+    int maxRecordingIndex = 60 * 180;
+    int playbackPad = -1;
+
     struct PadInfo {
         int fakepad;
         int teamId;
         int nextInput;
     };
     PadInfo padInfo[4] = {
-        { 0, -1, -1},
+        { 0, -1, -1 },
         { 0, -1, -1 },
         { 0, -1, -1 },
         { 0, -1, -1 }
@@ -39,6 +44,27 @@ namespace Mvc3FrameSimulation {
         padInfo[pad_idx].nextInput = input;
     }
 
+    void startRecording(int pad_idx) {
+        recordingIndex = 0;
+        memset(recording, 0, 60 * 180 * 4);
+        recordingPad = pad_idx;
+    }
+
+    void stopRecording() {
+        recordingPad = -1;
+    }
+
+    void startPlaying(int pad_idx) {
+        stopRecording();
+        recordingIndex = 0;
+        playbackPad = pad_idx;
+
+    }
+
+    void stopPlaying() {
+        playbackPad = -1;
+    }
+
     void setPadToTeam(int pad_idx, int team_idx) {
         padInfo[pad_idx].teamId = team_idx;
         sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
@@ -47,6 +73,15 @@ namespace Mvc3FrameSimulation {
 
     void OnReadInput(sMvc3NetPad* netPad) {
         for (int i = 0; i < 4; i++) {
+            if (recordingPad == i) {
+                recording[recordingIndex] = netPad->mPad[i].data.On;
+                recordingIndex++;
+            }
+            else if (playbackPad == i) {
+                padInfo[i].nextInput = recording[recordingIndex];
+                recordingIndex++;
+            }
+
             if (padInfo[i].fakepad) {
                 netPad->mPad[i].kind = 4;
 
@@ -59,7 +94,7 @@ namespace Mvc3FrameSimulation {
                 netPad->mPad[i].data.Chg = chg;
                 netPad->mPad[i].data.Trg = chg & nextInput;
                 netPad->mPad[i].data.Rel = ~nextInput & chg;
-                netPad->mPad[i].data.Rep = nextInput;
+                netPad->mPad[i].data.Rep = 0;
                 padInfo[i].nextInput = -1;
             }
         }

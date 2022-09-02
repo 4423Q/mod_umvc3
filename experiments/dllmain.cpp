@@ -13,8 +13,6 @@ using namespace Memory::VP;
 
 DWORD WINAPI Initialise(LPVOID lpreserved) {
 
-    sMvc3Manager* manager;
-
     AllocConsole();
 
     freopen("CONIN$", "r", stdin);
@@ -49,6 +47,20 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
         }
         if (line == "press") {
             Mvc3FrameSimulation::queueInput(3, 0x4000);
+        }
+        if (line == "record") {
+            Mvc3FrameSimulation::startRecording(0);
+            std::cout << "Recording!" << std::endl;
+        }
+        if (line == "recstop") {
+            Mvc3FrameSimulation::stopRecording();
+            std::cout << "Stopping" << std::endl;
+
+        }
+        if (line == "play") {
+            Mvc3FrameSimulation::startPlaying(3);
+            std::cout << "playing!" << std::endl;
+
         }
     }
     return TRUE;
