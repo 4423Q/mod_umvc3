@@ -84,6 +84,22 @@ struct sMvc3NetPad {
     };
     sPad_pad mPad[4];
 };
+
+struct sBattleSetting {
+    void* vtable;
+    char pad[0x30];
+    struct character {
+        void* vtable;
+        INT32 mTeam;
+        INT32 mType;
+        INT32 unknown;
+        INT32 mBody;
+        INT32 mCpu;
+        INT32 assist;
+        char pad[0x38];
+    };
+    character characters[6];
+};
  
 struct sMvc3Manager {
     sMvc3Manager_vtable * vtable;

@@ -246,11 +246,28 @@ namespace Mvc3FrameSimulation {
     }
 
     void StartMatch() {
-        void* sBattleSetting;
-        sBattleSetting = ((void* (__fastcall*)())_addr(0x140004700))();
+        sBattleSetting* sBS;
+        sBS = ((sBattleSetting* (__fastcall*)())_addr(0x140004700))();
         
-        ((void* (__fastcall*)(void*, int))_addr(0x14024e050))(sBattleSetting, 0); // Set Game Mode to versus
-        ((void* (__fastcall*)(void*))_addr(0x14024b530))(sBattleSetting); // Jump into match
+        ((void* (__fastcall*)(void*, int))_addr(0x14024e050))(sBS, 0); // Set Game Mode to versus
+        ((void* (__fastcall*)(void*, int))_addr(0x140146530))(sBS, 0xb4); // Set time limit
+        
+        // Uses the actual stage IDs, for indexes in the list use: 1402bc5d0
+        ((void* (__fastcall*)(void*, int))_addr(0x1401cf670))(sBS, 0x69); // Set Stage
+
+        int characterId = 0x21;
+
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[0]), characterId); // Set Characters
+        sBS->characters[1].mBody = 0x02;
+        sBS->characters[1].assist = 0x02;
+        sBS->characters[1].mType = characterId;
+       // ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[1]), characterId);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[2]), characterId);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[3]), characterId);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[4]), characterId);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[5]), characterId);
+
+        ((void* (__fastcall*)(void*))_addr(0x14024b530))(sBS); // Jump into match
     }
 
     void InstallHook()
