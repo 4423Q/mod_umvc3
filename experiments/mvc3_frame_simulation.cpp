@@ -255,7 +255,9 @@ namespace Mvc3FrameSimulation {
         // Uses the actual stage IDs, for indexes in the list use: 1402bc5d0
         ((void* (__fastcall*)(void*, int))_addr(0x1401cf670))(sBS, 0x69); // Set Stage
 
-        int characterId = 0x21;
+        //Should probably also wipe out the handicaps but cba to figure out how
+
+        int characterId = 0x14;
 
         ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[0]), characterId); // Set Characters
         sBS->characters[1].mBody = 0x02;
