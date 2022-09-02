@@ -76,9 +76,13 @@ struct sMvc3NetPad {
         char pad_no;
         char kind;
         char ability;
-        char pad[0x224];
+        char pad_[0x3];
+        char input_attr;
+        char pad__[0x7];
+        char socket_no;
+        char pad[0x2c7];
     };
-    sPad_pad mPad[6];
+    sPad_pad mPad[4];
 };
  
 struct sMvc3Manager {
@@ -103,6 +107,8 @@ struct sMvc3Manager {
     Updatable* mpNetworkRoom;
     Updatable* mpMovie;
     Updatable* mpEarthAttack;
+    char pad2[0x70];
+    int mpPadId[4];
 };
 
 

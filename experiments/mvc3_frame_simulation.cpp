@@ -41,10 +41,19 @@ namespace Mvc3FrameSimulation {
             ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
             ((void* (__fastcall*)(void*))_addr(0x140258540))(mvc3Main);
             ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
-            if (padLifeSupport) {
+            if (padLifeSupport == 1) {
                 for (int i = 0; i < 4; i++) {
-                    mvc3Main->mpNetPad[i].mPad->rno = 1;
-                    mvc3Main->mpNetPad[i].mPad->kind = 4;
+                    //mvc3Main->mpNetPad->mPad[i].rno = 1;
+                    mvc3Main->mpNetPad->mPad[i].kind = 4;
+                    //mvc3Main->mpNetPad->mPad[i].ability = 0x23;
+                    /*
+                    if (mvc3Main->mpNetPad->mPad[i].input_attr == 0x8) {
+                        mvc3Main->mpNetPad->mPad[i].input_attr = 0x18;
+                    }
+                    if (mvc3Main->mpNetPad->mPad[i].socket_no == 0x00) {
+                        mvc3Main->mpNetPad->mPad[i].socket_no == 0x77;
+                    }
+                    */
                 }
             }
             Update30(mvc3Main->mpPlatformUtil);
@@ -237,6 +246,11 @@ namespace Mvc3FrameSimulation {
 
     void setToggleMode(int tm) {
         toggleMode = tm;
+        return;
+    }
+
+    void setLifeSupport(int ls) {
+        padLifeSupport = ls;
         return;
     }
 
