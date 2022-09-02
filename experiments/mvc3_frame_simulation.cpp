@@ -10,7 +10,18 @@ using namespace Memory::VP;
 namespace Mvc3FrameSimulation {
     int toggle = 0;
     int toggleMode = 0;
-    int padLifeSupport = 0;
+    
+    struct PadInfo {
+        int lifesupport;
+        int teamId;
+        int nextInput;
+    };
+    PadInfo padInfo[4] = {
+        { 0, -1, -1},
+        { 0, -1, -1 },
+        { 0, -1, -1 },
+        { 0, -1, -1 }
+    };
      
     void Update30(Updatable* updatable) {
         ((void* (__fastcall*)(void*))updatable->vtable->update)(updatable);
@@ -22,6 +33,21 @@ namespace Mvc3FrameSimulation {
 
     void Update50(Updatable* updatable) {
         ((void* (__fastcall*)(void*))updatable->vtable->update50)(updatable);
+    }
+
+    void setPadToTeam(int pad_idx, int team_idx) {
+        padInfo[pad_idx].teamId = team_idx;
+        sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        manager->mpPadId[team_idx] = pad_idx;
+    }
+
+    void OnReadInput(sMvc3NetPad* netPad) {
+        for (int i = 0; i < 4; i++) {
+            if (padInfo[i].lifesupport) {
+                netPad->mPad[i].kind = 4;
+            }
+
+        }
     }
 
     void SimulateFrame(sMvc3Main* mvc3Main, int full) {
@@ -40,11 +66,8 @@ namespace Mvc3FrameSimulation {
             ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
             ((void* (__fastcall*)(void*))_addr(0x140258540))(mvc3Main);
             ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
-            if (padLifeSupport == 1) {
-                for (int i = 0; i < 4; i++) {
-                    mvc3Main->mpNetPad->mPad[i].kind = 4;
-                }
-            }
+            OnReadInput(mvc3Main->mpNetPad);
+            
             Update30(mvc3Main->mpPlatformUtil);
             Update48(mvc3Main->mpResource);
             Update48(mvc3Main->mpTool);
@@ -238,8 +261,8 @@ namespace Mvc3FrameSimulation {
         return;
     }
 
-    void setLifeSupport(int ls) {
-        padLifeSupport = ls;
+    void setLifeSupport(int idx, int ls) {
+        padInfo[idx].lifesupport = ls;
         return;
     }
 

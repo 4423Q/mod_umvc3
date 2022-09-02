@@ -26,13 +26,12 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
         if (line == "go") {
             std::cout << "GO TIME" << std::endl;
             Mvc3FrameSimulation::setToggleMode(1);
-            Mvc3FrameSimulation::setLifeSupport(1);
-            printf("Getting Manager\n");
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            printf("Patching pad indexes: %x\n", &(manager->mpPadId[0]));
+            Mvc3FrameSimulation::setLifeSupport(3, 1);
 
-            manager->mpPadId[0] = 0x00;
-            manager->mpPadId[1] = 0x03;
+            Mvc3FrameSimulation::setPadToTeam(0, 0);
+
+            Mvc3FrameSimulation::setPadToTeam(3, 1);
+
 
             Mvc3FrameSimulation::StartMatch();
         }
@@ -47,15 +46,6 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
         if (line == "myrender") {
             Mvc3FrameSimulation::setToggleMode(1);
             std::cout << "my render" << std::endl;
-        }
-        if (line == "ls") {
-            Mvc3FrameSimulation::setToggleMode(1);
-            Mvc3FrameSimulation::setLifeSupport(1);
-            std::cout << "life support" << std::endl;
-        }
-        if (line == "nols") {
-            Mvc3FrameSimulation::setLifeSupport(0);
-            std::cout << "no life support" << std::endl;
         }
     }
     return TRUE;
