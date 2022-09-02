@@ -24,8 +24,6 @@ namespace Mvc3FrameSimulation {
         ((void* (__fastcall*)(void*))updatable->vtable->update50)(updatable);
     }
 
-
-
     void SimulateFrame(sMvc3Main* mvc3Main, int full) {
         //1402594a0
         sMvc3Manager* manager;
@@ -255,7 +253,7 @@ namespace Mvc3FrameSimulation {
         // Uses the actual stage IDs, for indexes in the list use: 1402bc5d0
         ((void* (__fastcall*)(void*, int))_addr(0x1401cf670))(sBS, 0x69); // Set Stage
 
-        //Should probably also wipe out the handicaps but cba to figure out how
+        //Should probably also wipe out the handicaps and damage settings but cba to figure out how
 
         int characterId = 0x14;
 
