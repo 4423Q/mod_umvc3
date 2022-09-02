@@ -80,7 +80,24 @@ struct sMvc3NetPad {
         char input_attr;
         char pad__[0x7];
         char socket_no;
-        char pad[0x2c7];
+        char pad[0x14b];
+        struct SPad_pad_data {
+            INT32 On;
+            INT32 Old;
+            INT32 Trg;
+            INT32 Rel;
+            INT32 Chg;
+            INT32 Rep;
+            INT32 Rx;
+            INT32 Ry;
+            INT32 Lx;
+            INT32 Ly;
+            char Rz;
+            char Lz;
+            char pad[0x2];
+        };
+        SPad_pad_data data;
+        char pad___[0x150];
     };
     sPad_pad mPad[4];
 };

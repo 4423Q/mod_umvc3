@@ -35,6 +35,10 @@ namespace Mvc3FrameSimulation {
         ((void* (__fastcall*)(void*))updatable->vtable->update50)(updatable);
     }
 
+    void queueInput(int pad_idx, int input) {
+        padInfo[pad_idx].nextInput = input;
+    }
+
     void setPadToTeam(int pad_idx, int team_idx) {
         padInfo[pad_idx].teamId = team_idx;
         sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
@@ -45,8 +49,19 @@ namespace Mvc3FrameSimulation {
         for (int i = 0; i < 4; i++) {
             if (padInfo[i].lifesupport) {
                 netPad->mPad[i].kind = 4;
+                netPad->mPad[i].data.On = 0;
+                netPad->mPad[i].data.Chg = 0;
+                netPad->mPad[i].data.Trg = 0;
+                netPad->mPad[i].data.Rep = 0;
             }
-
+            if (padInfo[i].nextInput != -1) {
+                int nextInput = padInfo[i].nextInput;
+                netPad->mPad[i].data.On = nextInput;
+                netPad->mPad[i].data.Chg = nextInput;
+                netPad->mPad[i].data.Trg = nextInput;
+                netPad->mPad[i].data.Rep = nextInput;
+                padInfo[i].nextInput = -1;
+            }
         }
     }
 
