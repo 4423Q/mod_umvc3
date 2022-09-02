@@ -48,7 +48,7 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
             std::cout << "my render" << std::endl;
         }
         if (line == "press") {
-            Mvc3FrameSimulation::queueInput(3, 0x80);
+            Mvc3FrameSimulation::queueInput(3, 0x4000);
         }
     }
     return TRUE;

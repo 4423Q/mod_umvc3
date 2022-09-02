@@ -49,16 +49,16 @@ namespace Mvc3FrameSimulation {
         for (int i = 0; i < 4; i++) {
             if (padInfo[i].fakepad) {
                 netPad->mPad[i].kind = 4;
-                netPad->mPad[i].data.On = 0;
-                netPad->mPad[i].data.Chg = 0;
-                netPad->mPad[i].data.Trg = 0;
-                netPad->mPad[i].data.Rep = 0;
-            }
-            if (padInfo[i].nextInput != -1) {
-                int nextInput = padInfo[i].nextInput;
+
+                // cloned from 140511313
+
+                int nextInput = padInfo[i].nextInput != -1 ? padInfo[i].nextInput : 0;
+                int old = netPad->mPad[i].data.Old;
                 netPad->mPad[i].data.On = nextInput;
-                netPad->mPad[i].data.Chg = nextInput;
-                netPad->mPad[i].data.Trg = nextInput;
+                int chg = nextInput ^ old;
+                netPad->mPad[i].data.Chg = chg;
+                netPad->mPad[i].data.Trg = chg & nextInput;
+                netPad->mPad[i].data.Rel = ~nextInput & chg;
                 netPad->mPad[i].data.Rep = nextInput;
                 padInfo[i].nextInput = -1;
             }
