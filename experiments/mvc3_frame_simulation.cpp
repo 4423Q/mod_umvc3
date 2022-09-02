@@ -24,10 +24,7 @@ namespace Mvc3FrameSimulation {
         ((void* (__fastcall*)(void*))updatable->vtable->update50)(updatable);
     }
 
-    struct Mystery{
-        int unknown;
-        int unknown2;
-    };
+
 
     void SimulateFrame(sMvc3Main* mvc3Main, int full) {
         //1402594a0
@@ -35,6 +32,10 @@ namespace Mvc3FrameSimulation {
         void* sRender;
         void* sPrimitive;
         void* sPad;
+        struct Mystery {
+            int unknown;
+            int unknown2;
+        };
         Mystery unknown;
 
         if (full == 1) {
@@ -43,17 +44,7 @@ namespace Mvc3FrameSimulation {
             ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
             if (padLifeSupport == 1) {
                 for (int i = 0; i < 4; i++) {
-                    //mvc3Main->mpNetPad->mPad[i].rno = 1;
                     mvc3Main->mpNetPad->mPad[i].kind = 4;
-                    //mvc3Main->mpNetPad->mPad[i].ability = 0x23;
-                    /*
-                    if (mvc3Main->mpNetPad->mPad[i].input_attr == 0x8) {
-                        mvc3Main->mpNetPad->mPad[i].input_attr = 0x18;
-                    }
-                    if (mvc3Main->mpNetPad->mPad[i].socket_no == 0x00) {
-                        mvc3Main->mpNetPad->mPad[i].socket_no == 0x77;
-                    }
-                    */
                 }
             }
             Update30(mvc3Main->mpPlatformUtil);
@@ -71,12 +62,12 @@ namespace Mvc3FrameSimulation {
             sRender = ((void* (__fastcall*)())_addr(0x1400047a0))(); // get srender
             ((void* (__fastcall*)(void*, int))_addr(0x14053de60))(sRender, 2);
             sRender = ((void* (__fastcall*)())_addr(0x1400047a0))(); // get srender
-            ((void* (__fastcall*)(void*, void*))_addr(0x14020c7d0))(sRender, &unknown); //Is this right?
+            ((void* (__fastcall*)(void*, void*))_addr(0x14020c7d0))(sRender, &unknown);
 
             sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
-            ((void* (__fastcall*)(void*, int))_addr(0x140932790))(sPrimitive, unknown.unknown); //Is this right either?
+            ((void* (__fastcall*)(void*, int))_addr(0x140932790))(sPrimitive, unknown.unknown); 
             sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
-            ((void* (__fastcall*)(void*, int))_addr(0x140447110))(sPrimitive, unknown.unknown2); // wtf? 
+            ((void* (__fastcall*)(void*, int))_addr(0x140447110))(sPrimitive, unknown.unknown2); 
 
             Update48(mvc3Main->mpPrimitive);
             Update48(mvc3Main->mpGpuParticle);
@@ -254,15 +245,21 @@ namespace Mvc3FrameSimulation {
         return;
     }
 
+    void StartMatch() {
+        void* sBattleSetting;
+        sBattleSetting = ((void* (__fastcall*)())_addr(0x140004700))();
+        
+        ((void* (__fastcall*)(void*, int))_addr(0x14024e050))(sBattleSetting, 0); // Set Game Mode to versus
+        ((void* (__fastcall*)(void*))_addr(0x14024b530))(sBattleSetting); // Jump into match
+    }
+
     void InstallHook()
     {
-
         Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
         Patch(_addr(0x14051dfac), 0x48);
         Patch(_addr(0x14051dfad), 0x8b);
         Patch(_addr(0x14051dfae), 0xcf);
         InjectHook(_addr(0x14051dfaf), tramp->Jump(HookRenderFunction), PATCH_CALL);
         Nop(_addr(0x14051dfb4), 1);
-
     }
 }

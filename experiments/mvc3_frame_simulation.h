@@ -6,4 +6,5 @@ namespace Mvc3FrameSimulation {
 	void setToggleMode(int toggleMode);
 	void setLifeSupport(int ls);
 	void InstallHook();
+	void StartMatch();
 }

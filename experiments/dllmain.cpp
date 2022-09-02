@@ -12,7 +12,7 @@ using namespace Memory::VP;
 
 
 DWORD WINAPI Initialise(LPVOID lpreserved) {
-    void* sBattleSetting;
+
     sMvc3Manager* manager;
 
     AllocConsole();
@@ -34,8 +34,7 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
             manager->mpPadId[0] = 0x00;
             manager->mpPadId[1] = 0x03;
 
-            sBattleSetting = ((void* (__fastcall*)())_addr(0x140004700))();
-            ((void* (__fastcall*)(void*))_addr(0x14024b530))(sBattleSetting); // Jump into match
+            Mvc3FrameSimulation::StartMatch();
         }
         if (line == "alternate") {
             Mvc3FrameSimulation::setToggleMode(2);
