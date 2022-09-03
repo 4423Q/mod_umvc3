@@ -75,6 +75,8 @@ namespace Mvc3FrameSimulation {
         for (int i = 0; i < 4; i++) {
             if (recordingPad == i) {
                 recording[recordingIndex] = netPad->mPad[i].data.On;
+                int encoded = ((int(__fastcall*)(int, int, int))_addr(0x14002da30))(0, netPad->mPad[i].data.On, i);
+                printf("%x\n", encoded);
                 recordingIndex++;
             }
             else if (playbackPad == i) {
@@ -328,7 +330,7 @@ namespace Mvc3FrameSimulation {
 
         //Should probably also wipe out the handicaps and damage settings but cba to figure out how
 
-        int characterId = 0x14;
+        int characterId = 0x23;
 
         ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[0]), characterId); // Set Characters
         sBS->characters[1].mBody = 0x02;
