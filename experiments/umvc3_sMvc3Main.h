@@ -3,6 +3,11 @@ typedef struct sMvc3Main sMvc3Main, *PsMvc3Main;
 
 typedef void* pointer;
 
+
+
+struct cChrInput;
+struct uCharacter;
+
 struct sUnit_vtable {
     char pad[0x30];
     void* update;
@@ -117,7 +122,28 @@ struct sBattleSetting {
     };
     character characters[6];
 };
- 
+
+
+struct cChrInput {
+    void* unknown;
+    uCharacter* character;
+    INT32 Old;
+    INT32 On;
+    char pad[0x549]; 
+};
+
+struct uCharacter {
+    char pad2[0x21c8];
+    cChrInput mInput;
+    char pad[0x667];
+    INT32 char_id;
+    INT32 mId;
+    INT32 mPlrId;
+    INT32 mTeamId;
+    INT32 mSettingId;
+};
+
+
 struct sMvc3Manager {
     sMvc3Manager_vtable * vtable;
     char pad[0x30];

@@ -4,14 +4,19 @@
 #include "umvc3utils.h"
 #include "MemoryMgr.h"
 #include "umvc3_sMvc3Main.h"
+#include <vector>
 using namespace Memory::VP;
 
 
 namespace Mvc3FrameSimulation {
+    struct RecordingItem {
+        int p1;
+        int p2;
+    };
     int toggle = 0;
     int toggleMode = 0;
-    int recordingPad = -1;
-    int recording[60 * 180] = { 0 };
+    int recordingMode = 0;
+    std::vector<RecordingItem> recording;
     int recordingIndex;
     int maxRecordingIndex = 60 * 180;
     int playbackPad = -1;
@@ -46,23 +51,23 @@ namespace Mvc3FrameSimulation {
 
     void startRecording(int pad_idx) {
         recordingIndex = 0;
-        memset(recording, 0, 60 * 180 * 4);
-        recordingPad = pad_idx;
+        recording.clear();
+        recording.push_back({ -1, -1 });
+        recordingMode = 1;
     }
 
     void stopRecording() {
-        recordingPad = -1;
+        recordingMode = 0;
     }
 
     void startPlaying(int pad_idx) {
         stopRecording();
         recordingIndex = 0;
-        playbackPad = pad_idx;
-
+        recordingMode = 2;
     }
 
     void stopPlaying() {
-        playbackPad = -1;
+        recordingMode = 0;
     }
 
     void setPadToTeam(int pad_idx, int team_idx) {
@@ -73,22 +78,11 @@ namespace Mvc3FrameSimulation {
 
     void OnReadInput(sMvc3NetPad* netPad) {
         for (int i = 0; i < 4; i++) {
-            if (recordingPad == i) {
-                recording[recordingIndex] = netPad->mPad[i].data.On;
-                int encoded = ((int(__fastcall*)(int, int, int))_addr(0x14002da30))(0, netPad->mPad[i].data.On, i);
-                printf("%x\n", encoded);
-                recordingIndex++;
-            }
-            else if (playbackPad == i) {
-                padInfo[i].nextInput = recording[recordingIndex];
-                recordingIndex++;
-            }
-
             if (padInfo[i].fakepad) {
                 netPad->mPad[i].kind = 4;
 
                 // cloned from 140511313
-
+                /*
                 int nextInput = padInfo[i].nextInput != -1 ? padInfo[i].nextInput : 0;
                 int old = netPad->mPad[i].data.Old;
                 netPad->mPad[i].data.On = nextInput;
@@ -98,6 +92,7 @@ namespace Mvc3FrameSimulation {
                 netPad->mPad[i].data.Rel = ~nextInput & chg;
                 netPad->mPad[i].data.Rep = 0;
                 padInfo[i].nextInput = -1;
+                */
             }
         }
     }
@@ -335,14 +330,57 @@ namespace Mvc3FrameSimulation {
         ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[0]), characterId); // Set Characters
         sBS->characters[1].mBody = 0x02;
         sBS->characters[1].assist = 0x02;
-        sBS->characters[1].mType = characterId;
+        sBS->characters[1].mType = characterId + 1;
        // ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[1]), characterId);
-        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[2]), characterId);
-        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[3]), characterId);
-        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[4]), characterId);
-        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[5]), characterId);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[2]), characterId + 2);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[3]), characterId + 3);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[4]), characterId + 4);
+        ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[5]), characterId + 5);
 
         ((void* (__fastcall*)(void*))_addr(0x14024b530))(sBS); // Jump into match
+    }
+
+    void OnPostInput(uCharacter* character) {
+        int teamId = character->mTeamId;
+        if (recordingMode == 1) {
+            if (recordingIndex >= maxRecordingIndex) {
+                stopRecording();
+            }
+            RecordingItem back = recording.back();
+            if (teamId == 0 && back.p1 == -1) {
+                back.p1 = character->mInput.On;
+            }
+            if (teamId == 1 && back.p2 == -1) {
+                back.p2 = character->mInput.On;
+            }
+            recording.at(recording.size() - 1) = back;
+            if (back.p1 != -1 && back.p2 != -1) {
+                recordingIndex++;
+                recording.push_back({ -1, -1 });
+            }
+        }
+        else if (recordingMode == 2) {
+            if (recordingIndex >= recording.size()) {
+                stopPlaying();
+                return;
+            }
+            if (teamId == 0) {
+                character->mInput.On = recording.at(recordingIndex).p1;
+                recordingIndex++;
+            }
+        }
+    }
+
+    int HookPostInputUpdate(uCharacter* character) {
+        OnPostInput(character);
+
+        return character->mTeamId;
+    }
+
+    void InstallInputHook()
+    {
+        Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
+        InjectHook(_addr(0x14002e280), tramp->Jump(HookPostInputUpdate), PATCH_CALL);
     }
 
     void InstallHook()
@@ -353,5 +391,7 @@ namespace Mvc3FrameSimulation {
         Patch(_addr(0x14051dfae), 0xcf);
         InjectHook(_addr(0x14051dfaf), tramp->Jump(HookRenderFunction), PATCH_CALL);
         Nop(_addr(0x14051dfb4), 1);
+        InstallInputHook();
     }
+
 }
