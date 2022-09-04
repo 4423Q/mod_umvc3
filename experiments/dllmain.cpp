@@ -7,9 +7,72 @@
 #include "mvc3_frame_simulation.h"
 #include <iostream>
 #include <string>
+#include "libs/ggponet.h"
 
 using namespace Memory::VP;
 
+bool begin_game(const char*) {
+    printf("GGPO SAYS GO");
+    Mvc3FrameSimulation::startGame();
+    return true;
+}
+
+bool advance_frame(int) {
+    return true;
+}
+
+bool load_game_state(unsigned char* buffer, int len)
+{
+    return true;
+}
+
+
+bool save_game_state(unsigned char** buffer, int* len, int* checksum, int)
+{
+    return true;
+}
+
+void free_buffer(void* buffer) {
+
+}
+
+bool log_game_state(char* filename, unsigned char* buffer, int)
+{
+    return true;
+}
+
+bool on_event_callback(GGPOEvent* info)
+{
+    return true;
+}
+
+void onGameReady() {
+    printf("GAME READY!!!");
+    GGPOSession * ggpo = NULL;
+    GGPOErrorCode result;
+    GGPOSessionCallbacks cb = {};
+
+    cb.begin_game = begin_game;
+    cb.advance_frame = advance_frame;
+    cb.load_game_state = load_game_state;
+    cb.save_game_state = save_game_state;
+    cb.free_buffer = free_buffer;
+    cb.log_game_state = log_game_state;
+    cb.on_event = on_event_callback;
+
+
+    char name[5] = { 'u','m','v','c','3' };
+
+    /*
+        result = ggpo_start_session(&ggpo,         // the new session object
+        &cb,           // our callbacks
+        "test_app",    // application name
+        2,             // 2 players
+        sizeof(int),   // size of an input packet
+        8001);         // our local udp port
+    */
+    result = ggpo_start_synctest(&ggpo, &cb, name, 2, sizeof(int), 1);
+}
 
 DWORD WINAPI Initialise(LPVOID lpreserved) {
 
@@ -21,6 +84,18 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
 
     printf("Initialise() | Begin!\n");
     for (std::string line; std::getline(std::cin, line);) {
+        if (line == "ggpo") {
+            std::cout << "GGPO TIME" << std::endl;
+            Mvc3FrameSimulation::setToggleMode(1);
+            Mvc3FrameSimulation::setFakePad(3, 1);
+
+            Mvc3FrameSimulation::setPadToTeam(0, 0);
+
+            Mvc3FrameSimulation::setPadToTeam(3, 1);
+
+            Mvc3FrameSimulation::StartMatch();
+            Mvc3FrameSimulation::OnGameReady(onGameReady);
+        }
         if (line == "go") {
             std::cout << "GO TIME" << std::endl;
             Mvc3FrameSimulation::setToggleMode(1);
@@ -30,8 +105,8 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
 
             Mvc3FrameSimulation::setPadToTeam(3, 1);
 
-
             Mvc3FrameSimulation::StartMatch();
+            Mvc3FrameSimulation::startGame();
         }
         if (line == "alternate") {
             Mvc3FrameSimulation::setToggleMode(2);
@@ -58,7 +133,9 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
         if (line == "play") {
             Mvc3FrameSimulation::startPlaying(3);
             std::cout << "playing!" << std::endl;
-
+        }
+        if (line == "start") {
+            Mvc3FrameSimulation::startGame();
         }
     }
     return TRUE;

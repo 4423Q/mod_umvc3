@@ -170,9 +170,6 @@ struct sMvc3Manager {
     int mpPadId[4];
 };
 
-
-
-
 struct sMvc3Main {
     char sMain [0x40090];
     char field1_0x40090[256];
@@ -211,4 +208,17 @@ struct sMvc3Main {
     char is_focused_window; /* Created by retype action */
     char field35_0x402b7[33];
     pointer mpMvc3Manager; /* Created by retype action */
+};
+
+
+struct sAction {
+
+    char pad[0xd8];
+    INT32 mStep;
+    INT32 mStepOrder;
+    INT32 mSubStep;
+    INT32 mStepTime;
+    INT32 mStepTime2;
+    INT32 mStepTimeWin;
+    INT32 mStepFrame;
 };

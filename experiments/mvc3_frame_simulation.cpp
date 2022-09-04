@@ -19,6 +19,10 @@ namespace Mvc3FrameSimulation {
     std::vector<RecordingItem> recording;
     int recordingIndex;
     int maxRecordingIndex = 60 * 180;
+    int do_not_start = 0;
+    void (* onGameReady)() = nullptr;
+    void (*onLocalPlayerInput)(int, int) = nullptr;
+    int prevStep = 0;
 
     struct PadInfo {
         int fakepad;
@@ -78,6 +82,14 @@ namespace Mvc3FrameSimulation {
         }
     }
 
+    void startGame() {
+        do_not_start = 0;
+    }
+
+    void OnGameReady(void (*cb)()) {
+        onGameReady = cb;
+    }
+
     void SimulateFrame(sMvc3Main* mvc3Main, int full) {
         //1402594a0
         sMvc3Manager* manager;
@@ -89,6 +101,17 @@ namespace Mvc3FrameSimulation {
             int unknown2;
         };
         Mystery unknown;
+
+        sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+        printf("Step: %x\n", action->mStep);
+        if (action->mStep == 2) {
+            if (prevStep != action->mStep) {
+                if (onGameReady != nullptr) onGameReady();
+                prevStep = action->mStep;
+            }
+            if (do_not_start == 1) return;
+        }
+        prevStep = action->mStep;
 
         if (full == 1) {
             ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
@@ -295,6 +318,7 @@ namespace Mvc3FrameSimulation {
     }
 
     void StartMatch() {
+        do_not_start = 1;
         sBattleSetting* sBS;
         sBS = ((sBattleSetting* (__fastcall*)())_addr(0x140004700))();
         
@@ -323,6 +347,9 @@ namespace Mvc3FrameSimulation {
 
     void OnPostInput(uCharacter* character) {
         int teamId = character->mTeamId;
+        if (onLocalPlayerInput) {
+            onLocalPlayerInput(teamId, 0);
+        }
         if (recordingMode == 1) {
             if (recordingIndex >= maxRecordingIndex) {
                 stopRecording();
@@ -374,5 +401,4 @@ namespace Mvc3FrameSimulation {
         Nop(_addr(0x14051dfb4), 1);
         InstallInputHook();
     }
-
 }
