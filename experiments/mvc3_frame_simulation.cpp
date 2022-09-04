@@ -19,18 +19,16 @@ namespace Mvc3FrameSimulation {
     std::vector<RecordingItem> recording;
     int recordingIndex;
     int maxRecordingIndex = 60 * 180;
-    int playbackPad = -1;
 
     struct PadInfo {
         int fakepad;
         int teamId;
-        int nextInput;
     };
     PadInfo padInfo[4] = {
-        { 0, -1, -1 },
-        { 0, -1, -1 },
-        { 0, -1, -1 },
-        { 0, -1, -1 }
+        { 0, -1, },
+        { 0, -1, },
+        { 0, -1, },
+        { 0, -1, }
     };
      
     void Update30(Updatable* updatable) {
@@ -43,10 +41,6 @@ namespace Mvc3FrameSimulation {
 
     void Update50(Updatable* updatable) {
         ((void* (__fastcall*)(void*))updatable->vtable->update50)(updatable);
-    }
-
-    void queueInput(int pad_idx, int input) {
-        padInfo[pad_idx].nextInput = input;
     }
 
     void startRecording(int pad_idx) {
@@ -80,19 +74,6 @@ namespace Mvc3FrameSimulation {
         for (int i = 0; i < 4; i++) {
             if (padInfo[i].fakepad) {
                 netPad->mPad[i].kind = 4;
-
-                // cloned from 140511313
-                /*
-                int nextInput = padInfo[i].nextInput != -1 ? padInfo[i].nextInput : 0;
-                int old = netPad->mPad[i].data.Old;
-                netPad->mPad[i].data.On = nextInput;
-                int chg = nextInput ^ old;
-                netPad->mPad[i].data.Chg = chg;
-                netPad->mPad[i].data.Trg = chg & nextInput;
-                netPad->mPad[i].data.Rel = ~nextInput & chg;
-                netPad->mPad[i].data.Rep = 0;
-                padInfo[i].nextInput = -1;
-                */
             }
         }
     }
