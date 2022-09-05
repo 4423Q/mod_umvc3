@@ -9,6 +9,7 @@ using namespace Memory::VP;
 
 
 namespace Mvc3FrameSimulation {
+    Mvc3GameState state;
     struct RecordingItem {
         int p1;
         int p2;
@@ -21,8 +22,12 @@ namespace Mvc3FrameSimulation {
     int maxRecordingIndex = 60 * 180;
     int do_not_start = 0;
     void (* onGameReady)() = nullptr;
-    void (*onLocalPlayerInput)(int, int) = nullptr;
+    bool (*onLocalPlayerInput)(int, int) = nullptr;
+    void (*onAdvanceFrameComplete)() = nullptr;
+    void (*onFrameComplete)() = nullptr;
     int prevStep = 0;
+    int nextInputP1 = -1;
+    int nextInputP2 = -1;
 
     struct PadInfo {
         int fakepad;
@@ -79,6 +84,7 @@ namespace Mvc3FrameSimulation {
             if (padInfo[i].fakepad) {
                 netPad->mPad[i].kind = 4;
             }
+      
         }
     }
 
@@ -90,7 +96,253 @@ namespace Mvc3FrameSimulation {
         onGameReady = cb;
     }
 
-    void SimulateFrame(sMvc3Main* mvc3Main, int full) {
+    // If cb returns false game frame will not advance
+    void OnLocalPlayerInput(bool (*cb)(int, int)) {
+        onLocalPlayerInput = cb;
+    }
+
+    void OnAdvanceFrameComplete(void (*cb)()) {
+        onAdvanceFrameComplete = cb;
+    }
+
+    void OnFrameComplete(void (*cb)()) {
+        onFrameComplete = cb;
+    }
+
+    void getInputs(sMvc3Main* mvc3Main) {
+        ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
+        ((void* (__fastcall*)(void*))_addr(0x140258540))(mvc3Main);
+        ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
+        OnReadInput(mvc3Main->mpNetPad);
+    }
+
+    void renderStuff(sMvc3Main* mvc3Main) {
+        sMvc3Manager* manager;
+        void* sRender;
+        void* sPrimitive;
+        void* sPad;
+
+        struct Mystery {
+            int unknown;
+            int unknown2;
+        };
+        Mystery unknown;
+
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update48(manager->mpGameConfig);
+
+        sRender = ((void* (__fastcall*)())_addr(0x1400047a0))(); // get srender
+        ((void* (__fastcall*)(void*, int))_addr(0x14053de60))(sRender, 2);
+        sRender = ((void* (__fastcall*)())_addr(0x1400047a0))(); // get srender
+        ((void* (__fastcall*)(void*, void*))_addr(0x14020c7d0))(sRender, &unknown);
+
+        sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
+        ((void* (__fastcall*)(void*, int))_addr(0x140932790))(sPrimitive, unknown.unknown);
+        sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
+        ((void* (__fastcall*)(void*, int))_addr(0x140447110))(sPrimitive, unknown.unknown2);
+
+        Update48(mvc3Main->mpPrimitive);
+        Update48(mvc3Main->mpGpuParticle);
+        ((void* (__fastcall*)(void*))_addr(0x140537080))(mvc3Main->mpRender);
+
+        Update30(mvc3Main->mpArea);
+
+
+        // part 2
+                    // Keyboards and mousesies
+        Update30(mvc3Main->mpVibration);
+        ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update)(mvc3Main->mpNetPad);
+        Update30(mvc3Main->mpMouse);
+        Update30(mvc3Main->mpId);
+        Update30(mvc3Main->mpKeyboard);
+        ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update50)(mvc3Main->mpNetPad);
+        Update30(mvc3Main->mpShader2);
+        Update30(mvc3Main->mpAI);
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpGameConfig);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpGameUi);
+
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update48(manager->mpGameEffect);
+
+        ((void* (__fastcall*)(void*))_addr(0x140647910))(mvc3Main->mpAI);
+        Update30(mvc3Main->mpEffect);
+        Update30(mvc3Main->mpGpuParticle);
+        Update30(mvc3Main->mpCamera);
+        Update30(mvc3Main->mpSound);
+        Update30(mvc3Main->mpScene);
+        Update30(mvc3Main->mpShadow);
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        ((void* (__fastcall*)(void*))manager->vtable->update)(manager);
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpCharacter);
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpStage);
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpGameEffect);
+
+
+
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpReplay);
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpGSound);
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpBattleSetting);
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpMvc3Setting);
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpNetwork);
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpLicense);
+
+            Update30(mvc3Main->mpNetwork);
+            Update30(mvc3Main->mpAgent);
+            Update30(mvc3Main->mpGuide);
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpRanking);
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpNetworkRoom);
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            Update30(manager->mpEarthAttack);
+
+            Update30(mvc3Main->mpTool);
+            Update30(mvc3Main->mpPrimitive);
+
+            ((void* (__fastcall*)(void*))_addr(0x140259ea0))(mvc3Main);
+
+            Update30(mvc3Main->mpRender);
+            ((void* (__fastcall*)(void*))_addr(0x14053a250))(mvc3Main->mpRender);
+            Update50(mvc3Main->mpGpuParticle);
+            Update50(mvc3Main->mpPrimitive);
+            Update30(mvc3Main->mpCapture);
+
+
+            sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
+            int result1 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3d00))(sPad, 0xa4, 1);
+
+            sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
+            int result2 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3d00))(sPad, 0xa5, 1);
+            if ((result1 != 0) || (result2 != 0)) {
+
+                sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
+                int result3 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3dc0))(sPad, 0x73, 1);
+
+                if (result3 != 0) {
+                    void* sMain = ((void* (__fastcall*)())_addr(0x0140003150))();
+                    ((void* (__fastcall*)(void*))_addr(0x1405213a0))(sMain);
+                }
+
+            }
+
+    }
+
+    void advanceFrame(sMvc3Main* mvc3Main) {
+        sMvc3Manager* manager;
+
+            ((void* (__fastcall*)(void*))_addr(0x1405bb710))(mvc3Main->mpCollision);
+        
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))_addr(0x14014f410))(manager->mpAction);
+        
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))manager->mpShot->vtable->update2)(manager->mpShot);
+        
+            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update)(mvc3Main->mpUnit);
+            ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update)(mvc3Main->mpCollision);
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))manager->mpHitSolver->vtable->update)(manager->mpHitSolver);
+
+
+            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update3)(mvc3Main->mpUnit);
+            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update2)(mvc3Main->mpUnit);
+
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))manager->mpShot->vtable->update)(manager->mpShot);
+   
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))_addr(0x140011320))(manager->mpHitSolver);
+        
+            ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update2)(mvc3Main->mpCollision);
+    
+        if (onAdvanceFrameComplete != nullptr) {
+            onAdvanceFrameComplete();
+        }
+        return;
+    }
+
+    void updateSavedState(sMvc3Main* mvc3Main) {
+
+        sMvc3Manager * manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        memcpy(&state.sChar, manager->mpCharacter, sizeof(state.sChar));
+    }
+
+    void ReOrderedFrame(sMvc3Main* mvc3Main) {
+
+        // Freeze the game if not ready to start
+        sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+        //printf("Step: %x\n", action->mStep);
+        if (action->mStep == 2) {
+            if (prevStep != action->mStep) {
+                if (onGameReady != nullptr) onGameReady();
+                prevStep = action->mStep;
+            }
+            if (do_not_start == 1) return;
+        }
+        prevStep = action->mStep;
+
+
+        // Read Inputs
+        getInputs(mvc3Main);
+
+
+        // Idk what this does
+        Update30(mvc3Main->mpPlatformUtil);
+        Update48(mvc3Main->mpResource);
+        Update48(mvc3Main->mpTool);
+        Update48(mvc3Main->mpEffect);
+
+        // Send Local Input to GGPO
+        int currentInput = mvc3Main->mpNetPad->mPad[0].data.On;
+        int encoded = ((int(__fastcall*)(int, int, int))_addr(0x14002da30))(0, currentInput, 0);
+
+        // If inputs are okay, or we haven't started the game yet, advance the frame
+
+        if (action->mStep < 2 || !onLocalPlayerInput || onLocalPlayerInput && onLocalPlayerInput(0, encoded)) {
+            // Okay to advance!!
+            advanceFrame(mvc3Main);
+        }
+
+        // Render the game
+        renderStuff(mvc3Main);
+
+        if (onFrameComplete) {
+            onFrameComplete();
+        }
+    }
+
+    sMvc3Main* getSMain() {
+        sMvc3Main* sMain = *reinterpret_cast<sMvc3Main**>(_addr(0x140e177e8));
+        return sMain;
+    }
+
+    //drawMode 0 = no draw, 1 = draw and update, 2 = only draw
+    void SimulateFrame(sMvc3Main* mvc3Main, int drawMode) {
+        
         //1402594a0
         sMvc3Manager* manager;
         void* sRender;
@@ -113,7 +365,7 @@ namespace Mvc3FrameSimulation {
         }
         prevStep = action->mStep;
 
-        if (full == 1) {
+        if (drawMode >= 1) {
             ((void* (__fastcall*)(void*))_addr(0x140521df0))(&mvc3Main->sMain);
             ((void* (__fastcall*)(void*))_addr(0x140258540))(mvc3Main);
             ((void* (__fastcall*)(void*))_addr(0x140289c30))(mvc3Main->mpNetPad);
@@ -125,9 +377,11 @@ namespace Mvc3FrameSimulation {
             Update48(mvc3Main->mpEffect);
         }
 
-        ((void* (__fastcall*)(void*))_addr(0x1405bb710))(mvc3Main->mpCollision);
+        if (drawMode < 2) {
+            ((void* (__fastcall*)(void*))_addr(0x1405bb710))(mvc3Main->mpCollision);
+        }
 
-        if (full == 1) {
+        if (drawMode >= 1) {
             manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
             Update48(manager->mpGameConfig);
 
@@ -148,10 +402,12 @@ namespace Mvc3FrameSimulation {
             Update30(mvc3Main->mpArea);
         }
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        ((void* (__fastcall*)(void*))_addr(0x14014f410))(manager->mpAction);
+        if (drawMode < 2) {
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))_addr(0x14014f410))(manager->mpAction);
+        }
 
-        if (full == 1) {
+        if (drawMode >= 1) {
             // Keyboards and mousesies
             Update30(mvc3Main->mpVibration);
             ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update)(mvc3Main->mpNetPad);
@@ -169,26 +425,29 @@ namespace Mvc3FrameSimulation {
         }
 
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        ((void* (__fastcall*)(void*))manager->mpShot->vtable->update2)(manager->mpShot);
+        if (drawMode < 2) {
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))manager->mpShot->vtable->update2)(manager->mpShot);
+        }
 
-        if (full == 1) {
+        if (drawMode >= 1) {
             manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
             Update48(manager->mpGameEffect);
         }
 
+        if (drawMode < 2) {
+            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update)(mvc3Main->mpUnit);
+            ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update)(mvc3Main->mpCollision);
 
-        ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update)(mvc3Main->mpUnit);
-        ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update)(mvc3Main->mpCollision);
-
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        ((void* (__fastcall*)(void*))manager->mpHitSolver->vtable->update)(manager->mpHitSolver);
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))manager->mpHitSolver->vtable->update)(manager->mpHitSolver);
 
 
-        ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update3)(mvc3Main->mpUnit);
-        ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update2)(mvc3Main->mpUnit);
+            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update3)(mvc3Main->mpUnit);
+            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update2)(mvc3Main->mpUnit);
+        }
 
-        if (full == 1) {
+        if (drawMode >= 1) {
             ((void* (__fastcall*)(void*))_addr(0x140647910))(mvc3Main->mpAI);
             Update30(mvc3Main->mpEffect);
             Update30(mvc3Main->mpGpuParticle);
@@ -207,20 +466,22 @@ namespace Mvc3FrameSimulation {
             Update30(manager->mpStage);
         }
 
+        if (drawMode < 2) {
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))manager->mpShot->vtable->update)(manager->mpShot);
+        }
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        ((void* (__fastcall*)(void*))manager->mpShot->vtable->update)(manager->mpShot);
-
-        if (full == 1) {
+        if (drawMode >= 1) {
             manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
             Update30(manager->mpGameEffect);
         }
 
+        if (drawMode < 2) {
+            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+            ((void* (__fastcall*)(void*))_addr(0x140011320))(manager->mpHitSolver);
+        }
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        ((void* (__fastcall*)(void*))_addr(0x140011320))(manager->mpHitSolver);
-
-        if (full == 1) {
+        if (drawMode >= 1) {
             manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
             Update30(manager->mpReplay);
             manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
@@ -251,9 +512,11 @@ namespace Mvc3FrameSimulation {
             Update30(mvc3Main->mpPrimitive);
         }
 
-        ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update2)(mvc3Main->mpCollision);
+        if (drawMode < 2) {
+            ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update2)(mvc3Main->mpCollision);
+        }
 
-        if (full == 1) {
+        if (drawMode >= 1) {
 
             ((void* (__fastcall*)(void*))_addr(0x140259ea0))(mvc3Main);
 
@@ -281,6 +544,9 @@ namespace Mvc3FrameSimulation {
 
             }
         }
+        if (onAdvanceFrameComplete != nullptr) {
+           // onAdvanceFrameComplete();
+        }
         return;
     }
 
@@ -303,6 +569,9 @@ namespace Mvc3FrameSimulation {
                 toggle = 1;
             }
             return;
+        case 3:
+            ReOrderedFrame(param);
+            return;
         }
         return;
     }
@@ -315,6 +584,14 @@ namespace Mvc3FrameSimulation {
     void setFakePad(int idx, int ls) {
         padInfo[idx].fakepad = ls;
         return;
+    }
+
+    void setNextInputP1(int input) {
+        nextInputP1 = input;
+    }
+
+    void setNextInputP2(int input) {
+        nextInputP2 = input;
     }
 
     void StartMatch() {
@@ -348,8 +625,9 @@ namespace Mvc3FrameSimulation {
     void OnPostInput(uCharacter* character) {
         int teamId = character->mTeamId;
         if (onLocalPlayerInput) {
-            onLocalPlayerInput(teamId, 0);
+            onLocalPlayerInput(teamId, character->mInput.On);
         }
+
         if (recordingMode == 1) {
             if (recordingIndex >= maxRecordingIndex) {
                 stopRecording();
@@ -373,10 +651,28 @@ namespace Mvc3FrameSimulation {
                 return;
             }
             if (teamId == 0) {
-                character->mInput.On = recording.at(recordingIndex).p1;
+                nextInputP1 = recording.at(recordingIndex).p1;
                 recordingIndex++;
             }
         }
+
+        if (nextInputP1 != -1 && teamId == 0) {
+            character->mInput.On = nextInputP1;
+            nextInputP1 = -1;
+        }
+        if (nextInputP2 != -1 && teamId == 1) {
+            character->mInput.On = nextInputP2;
+            nextInputP2 = -1;
+        }
+    }
+
+    void AdvanceFrame() {
+        updateSavedState(getSMain());
+        advanceFrame(getSMain());
+    }
+
+    Mvc3GameState* getState() {
+        return &state;
     }
 
     int HookPostInputUpdate(uCharacter* character) {

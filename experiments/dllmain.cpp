@@ -11,6 +11,14 @@
 
 using namespace Memory::VP;
 
+struct GameState {
+    int number;
+};
+
+GameState gs = { 0 };
+GGPOSession* ggpo = NULL;
+GGPOPlayerHandle local_player_handle;
+
 bool begin_game(const char*) {
     printf("GGPO SAYS GO");
     Mvc3FrameSimulation::startGame();
@@ -18,26 +26,46 @@ bool begin_game(const char*) {
 }
 
 bool advance_frame(int) {
+    Mvc3FrameSimulation::AdvanceFrame();
     return true;
 }
 
 bool load_game_state(unsigned char* buffer, int len)
 {
+    printf("Loading game state\n");
+    memcpy(&gs, buffer, len);
     return true;
 }
 
 
 bool save_game_state(unsigned char** buffer, int* len, int* checksum, int)
 {
+    printf("Saving 'game state'\n");
+    *len = sizeof(gs);
+     *buffer = (unsigned char*)malloc(*len);
+    if (!*buffer) {
+        printf("Err allocating mem\n");
+        return false;
+    }
+    memcpy(*buffer, &gs, *len);
+    *checksum = 1;
     return true;
 }
 
 void free_buffer(void* buffer) {
-
+    free(buffer);
 }
 
 bool log_game_state(char* filename, unsigned char* buffer, int)
 {
+    FILE* fp = nullptr;
+    fopen_s(&fp, filename, "w");
+    if (fp) {
+        GameState* gamestate = (GameState*)buffer;
+        fprintf(fp, "GameState object.\n");
+        fprintf(fp, "  number: %x\n", gamestate->number);
+        fclose(fp);
+    }
     return true;
 }
 
@@ -46,9 +74,48 @@ bool on_event_callback(GGPOEvent* info)
     return true;
 }
 
+bool onLocalInput(int team, int input) {
+    if (team == 0) {
+        //Send input to GGPO, then reconcile and send to game.
+        int localInput[1] = {input};
+        int result = ggpo_add_local_input(ggpo,               // the session object
+            local_player_handle,  // handle for p1
+            &localInput,              // p1's inputs
+            4);      // size of p1's inputs
+
+        printf("Setting input! %x\n", localInput[0]);
+        /* synchronize the local and remote inputs */
+        if (GGPO_SUCCEEDED(result)) {
+            int allInput[2] = { 0,0 };
+            int disconnect_flags;
+            result = ggpo_synchronize_input(ggpo,         // the session object
+                allInput,            // array of inputs
+                8,
+                &disconnect_flags);   // size of all inputs
+            if (GGPO_SUCCEEDED(result)) {
+                printf("Retrieved Input %x\n", localInput[0]);
+
+                Mvc3FrameSimulation::setNextInputP1(localInput[0]);
+                Mvc3FrameSimulation::setNextInputP2(0);
+                return true;
+            }
+            else {
+                printf("Failed to sync %x\n", result);
+                return false;
+            }
+        }
+        else {
+            printf("Failed to set :( %x\n", result);
+            return false;
+        }
+
+    }
+    return true;
+}
+
 void onGameReady() {
-    printf("GAME READY!!!");
-    GGPOSession * ggpo = NULL;
+    printf("GAME READY!!!\n");
+
     GGPOErrorCode result;
     GGPOSessionCallbacks cb = {};
 
@@ -71,7 +138,23 @@ void onGameReady() {
         sizeof(int),   // size of an input packet
         8001);         // our local udp port
     */
-    result = ggpo_start_synctest(&ggpo, &cb, name, 2, sizeof(int), 1);
+
+    result = ggpo_start_synctest(&ggpo, &cb, name, 2, 4, 1);
+    GGPOPlayer p1;
+    p1.type = GGPO_PLAYERTYPE_LOCAL;
+    ggpo_add_player(ggpo, &p1, &local_player_handle);
+    ggpo_set_frame_delay(ggpo, local_player_handle, 5);
+
+    ggpo_set_disconnect_timeout(ggpo, 0);
+    ggpo_set_disconnect_notify_start(ggpo, 0);
+}
+
+void onAdvanceFrameComplete() {
+    ggpo_advance_frame(ggpo);
+}
+
+void onFrameComplete() {
+    ggpo_idle(ggpo, 3);
 }
 
 DWORD WINAPI Initialise(LPVOID lpreserved) {
@@ -86,15 +169,17 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
     for (std::string line; std::getline(std::cin, line);) {
         if (line == "ggpo") {
             std::cout << "GGPO TIME" << std::endl;
-            Mvc3FrameSimulation::setToggleMode(1);
+            Mvc3FrameSimulation::setToggleMode(3);
             Mvc3FrameSimulation::setFakePad(3, 1);
 
             Mvc3FrameSimulation::setPadToTeam(0, 0);
-
             Mvc3FrameSimulation::setPadToTeam(3, 1);
 
             Mvc3FrameSimulation::StartMatch();
+            Mvc3FrameSimulation::OnLocalPlayerInput(onLocalInput);
             Mvc3FrameSimulation::OnGameReady(onGameReady);
+            Mvc3FrameSimulation::OnAdvanceFrameComplete(onAdvanceFrameComplete);
+            Mvc3FrameSimulation::OnFrameComplete(onFrameComplete);
         }
         if (line == "go") {
             std::cout << "GO TIME" << std::endl;
@@ -119,6 +204,10 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
         if (line == "myrender") {
             Mvc3FrameSimulation::setToggleMode(1);
             std::cout << "my render" << std::endl;
+        }
+        if (line == "renderonly") {
+            Mvc3FrameSimulation::setToggleMode(3);
+            std::cout << "render only" << std::endl;
         }
 
         if (line == "record") {

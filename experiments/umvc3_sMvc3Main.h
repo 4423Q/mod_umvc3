@@ -132,6 +132,10 @@ struct cChrInput {
     char pad[0x549]; 
 };
 
+struct sCharacter {
+    char pad[0x4640];
+};
+
 struct uCharacter {
     char pad2[0x21c8];
     cChrInput mInput;
