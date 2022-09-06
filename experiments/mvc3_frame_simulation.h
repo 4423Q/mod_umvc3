@@ -6,6 +6,7 @@ namespace Mvc3FrameSimulation {
 	struct Mvc3GameState {
 		sCharacter sChar;
 		uCharacter c0;
+		uCharacter c3;
 		sAction action;
 	};
 

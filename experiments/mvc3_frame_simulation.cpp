@@ -149,7 +149,7 @@ namespace Mvc3FrameSimulation {
         Update48(mvc3Main->mpGpuParticle);
         ((void* (__fastcall*)(void*))_addr(0x140537080))(mvc3Main->mpRender);
 
-        Update30(mvc3Main->mpArea);
+        //Update30(mvc3Main->mpArea);
 
 
         // part 2
@@ -256,7 +256,9 @@ namespace Mvc3FrameSimulation {
 
         
         ((void* (__fastcall*)(void*))_addr(0x1405bb710))(mvc3Main->mpCollision);
-        
+
+        //ADded from render
+        Update30(mvc3Main->mpArea);
 
         manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
         ((void* (__fastcall*)(void*))_addr(0x14014f410))(manager->mpAction);
@@ -677,8 +679,8 @@ namespace Mvc3FrameSimulation {
     }
 
     void AdvanceFrame() {
-        sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
-        ((void * (__fastcall*)(sAction*))_addr(0x140006d20))(action);
+        //sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+        //((void * (__fastcall*)(sAction*))_addr(0x140006d20))(action);
        
         advanceFrame(getSMain());
     }
@@ -693,6 +695,8 @@ namespace Mvc3FrameSimulation {
         
         memcpy(&currentState->sChar, manager->mpCharacter, sizeof(sCharacter));
         memcpy(&currentState->c0, ((sCharacter*)manager->mpCharacter)->mTeam[0].point_char, sizeof(uCharacter));
+        memcpy(&currentState->c3, ((sCharacter*)manager->mpCharacter)->mTeam[1].point_char, sizeof(uCharacter));
+
         memcpy(&currentState->action, action, sizeof(sAction));
         return currentState;
     }
@@ -709,6 +713,8 @@ namespace Mvc3FrameSimulation {
         memcpy(manager->mpCharacter, &state->sChar, sizeof(sCharacter));
 
         memcpy(sChar->mTeam[0].point_char, &state->c0, sizeof(uCharacter));
+
+        memcpy(sChar->mTeam[1].point_char, &state->c3, sizeof(uCharacter));
         memcpy(action, &state->action, sizeof(sAction));
 
         return;
