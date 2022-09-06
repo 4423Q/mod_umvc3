@@ -5,6 +5,8 @@
 namespace Mvc3FrameSimulation {
 	struct Mvc3GameState {
 		sCharacter sChar;
+		uCharacter c0;
+		sAction action;
 	};
 
 	void setToggleMode(int toggleMode);
@@ -21,6 +23,7 @@ namespace Mvc3FrameSimulation {
 	void OnAdvanceFrameComplete(void (*cb)());
 	void OnFrameComplete(void (*cb)());
 	Mvc3GameState* getState();
+	void setState(Mvc3GameState* state);
 	void AdvanceFrame();
 	void setNextInputP1(int input);
 	void setNextInputP2(int input);

@@ -11,11 +11,6 @@
 
 using namespace Memory::VP;
 
-struct GameState {
-    int number;
-};
-
-GameState gs = { 0 };
 GGPOSession* ggpo = NULL;
 GGPOPlayerHandle local_player_handle;
 
@@ -26,6 +21,19 @@ bool begin_game(const char*) {
 }
 
 bool advance_frame(int) {
+    int allInput[2] = { 0,0 };
+    int disconnect_flags;
+    int result = ggpo_synchronize_input(ggpo,         // the session object
+        allInput,            // array of inputs
+        8,
+        &disconnect_flags);   // size of all inputs
+    if (GGPO_SUCCEEDED(result)) {
+        Mvc3FrameSimulation::setNextInputP1(allInput[0]);
+        Mvc3FrameSimulation::setNextInputP2(0);
+    }
+    else {
+        printf("Failed to sync %x\n", result);
+    }
     Mvc3FrameSimulation::AdvanceFrame();
     return true;
 }
@@ -33,7 +41,7 @@ bool advance_frame(int) {
 bool load_game_state(unsigned char* buffer, int len)
 {
     printf("Loading game state\n");
-    memcpy(&gs, buffer, len);
+    Mvc3FrameSimulation::setState((Mvc3FrameSimulation::Mvc3GameState*)buffer);
     return true;
 }
 
@@ -41,13 +49,13 @@ bool load_game_state(unsigned char* buffer, int len)
 bool save_game_state(unsigned char** buffer, int* len, int* checksum, int)
 {
     printf("Saving 'game state'\n");
-    *len = sizeof(gs);
+    *len = sizeof(Mvc3FrameSimulation::Mvc3GameState);
      *buffer = (unsigned char*)malloc(*len);
     if (!*buffer) {
         printf("Err allocating mem\n");
         return false;
     }
-    memcpy(*buffer, &gs, *len);
+    memcpy(*buffer, Mvc3FrameSimulation::getState(), *len);
     *checksum = 1;
     return true;
 }
@@ -61,9 +69,8 @@ bool log_game_state(char* filename, unsigned char* buffer, int)
     FILE* fp = nullptr;
     fopen_s(&fp, filename, "w");
     if (fp) {
-        GameState* gamestate = (GameState*)buffer;
+        Mvc3FrameSimulation::Mvc3GameState* gamestate = (Mvc3FrameSimulation::Mvc3GameState*)buffer;
         fprintf(fp, "GameState object.\n");
-        fprintf(fp, "  number: %x\n", gamestate->number);
         fclose(fp);
     }
     return true;
@@ -93,9 +100,9 @@ bool onLocalInput(int team, int input) {
                 8,
                 &disconnect_flags);   // size of all inputs
             if (GGPO_SUCCEEDED(result)) {
-                printf("Retrieved Input %x\n", localInput[0]);
+                printf("Retrieved Input %x\n", allInput[0]);
 
-                Mvc3FrameSimulation::setNextInputP1(localInput[0]);
+                Mvc3FrameSimulation::setNextInputP1(allInput[0]);
                 Mvc3FrameSimulation::setNextInputP2(0);
                 return true;
             }
@@ -205,8 +212,8 @@ DWORD WINAPI Initialise(LPVOID lpreserved) {
             Mvc3FrameSimulation::setToggleMode(1);
             std::cout << "my render" << std::endl;
         }
-        if (line == "renderonly") {
-            Mvc3FrameSimulation::setToggleMode(3);
+        if (line == "test") {
+            Mvc3FrameSimulation::setToggleMode(4);
             std::cout << "render only" << std::endl;
         }
 

@@ -28,6 +28,9 @@ namespace Mvc3FrameSimulation {
     int prevStep = 0;
     int nextInputP1 = -1;
     int nextInputP2 = -1;
+    bool doStateUpdate = false;
+    bool advanceFrameToNotify = false;
+
 
     struct PadInfo {
         int fakepad;
@@ -192,103 +195,101 @@ namespace Mvc3FrameSimulation {
 
 
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpReplay);
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpGSound);
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpBattleSetting);
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpMvc3Setting);
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpNetwork);
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpLicense);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpReplay);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpGSound);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpBattleSetting);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpMvc3Setting);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpNetwork);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpLicense);
 
-            Update30(mvc3Main->mpNetwork);
-            Update30(mvc3Main->mpAgent);
-            Update30(mvc3Main->mpGuide);
+        Update30(mvc3Main->mpNetwork);
+        Update30(mvc3Main->mpAgent);
+        Update30(mvc3Main->mpGuide);
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpRanking);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpRanking);
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpNetworkRoom);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpNetworkRoom);
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            Update30(manager->mpEarthAttack);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        Update30(manager->mpEarthAttack);
 
-            Update30(mvc3Main->mpTool);
-            Update30(mvc3Main->mpPrimitive);
+        Update30(mvc3Main->mpTool);
+        Update30(mvc3Main->mpPrimitive);
 
-            ((void* (__fastcall*)(void*))_addr(0x140259ea0))(mvc3Main);
+        ((void* (__fastcall*)(void*))_addr(0x140259ea0))(mvc3Main);
 
-            Update30(mvc3Main->mpRender);
-            ((void* (__fastcall*)(void*))_addr(0x14053a250))(mvc3Main->mpRender);
-            Update50(mvc3Main->mpGpuParticle);
-            Update50(mvc3Main->mpPrimitive);
-            Update30(mvc3Main->mpCapture);
+        Update30(mvc3Main->mpRender);
+        ((void* (__fastcall*)(void*))_addr(0x14053a250))(mvc3Main->mpRender);
+        Update50(mvc3Main->mpGpuParticle);
+        Update50(mvc3Main->mpPrimitive);
+        Update30(mvc3Main->mpCapture);
 
+
+        sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
+        int result1 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3d00))(sPad, 0xa4, 1);
+
+        sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
+        int result2 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3d00))(sPad, 0xa5, 1);
+        if ((result1 != 0) || (result2 != 0)) {
 
             sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
-            int result1 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3d00))(sPad, 0xa4, 1);
+            int result3 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3dc0))(sPad, 0x73, 1);
 
-            sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
-            int result2 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3d00))(sPad, 0xa5, 1);
-            if ((result1 != 0) || (result2 != 0)) {
-
-                sPad = ((void* (__fastcall*)())_addr(0x140001b00))();
-                int result3 = ((int(__fastcall*)(void*, int, char))_addr(0x1402b3dc0))(sPad, 0x73, 1);
-
-                if (result3 != 0) {
-                    void* sMain = ((void* (__fastcall*)())_addr(0x0140003150))();
-                    ((void* (__fastcall*)(void*))_addr(0x1405213a0))(sMain);
-                }
-
+            if (result3 != 0) {
+                void* sMain = ((void* (__fastcall*)())_addr(0x0140003150))();
+                ((void* (__fastcall*)(void*))_addr(0x1405213a0))(sMain);
             }
-
+        }
     }
 
     void advanceFrame(sMvc3Main* mvc3Main) {
+        printf("Starting Frame Advance\n");
         sMvc3Manager* manager;
 
-            ((void* (__fastcall*)(void*))_addr(0x1405bb710))(mvc3Main->mpCollision);
+        
+        ((void* (__fastcall*)(void*))_addr(0x1405bb710))(mvc3Main->mpCollision);
         
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            ((void* (__fastcall*)(void*))_addr(0x14014f410))(manager->mpAction);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        ((void* (__fastcall*)(void*))_addr(0x14014f410))(manager->mpAction);
         
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            ((void* (__fastcall*)(void*))manager->mpShot->vtable->update2)(manager->mpShot);
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        ((void* (__fastcall*)(void*))manager->mpShot->vtable->update2)(manager->mpShot);
         
-            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update)(mvc3Main->mpUnit);
-            ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update)(mvc3Main->mpCollision);
+        ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update)(mvc3Main->mpUnit);
+        ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update)(mvc3Main->mpCollision);
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            ((void* (__fastcall*)(void*))manager->mpHitSolver->vtable->update)(manager->mpHitSolver);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+       ((void* (__fastcall*)(void*))manager->mpHitSolver->vtable->update)(manager->mpHitSolver);
 
 
-            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update3)(mvc3Main->mpUnit);
-            ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update2)(mvc3Main->mpUnit);
+        ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update3)(mvc3Main->mpUnit); // UI?
+        ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update2)(mvc3Main->mpUnit);
 
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            ((void* (__fastcall*)(void*))manager->mpShot->vtable->update)(manager->mpShot);
+        
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        ((void* (__fastcall*)(void*))manager->mpShot->vtable->update)(manager->mpShot);
    
-            manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-            ((void* (__fastcall*)(void*))_addr(0x140011320))(manager->mpHitSolver);
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        ((void* (__fastcall*)(void*))_addr(0x140011320))(manager->mpHitSolver);
         
-            ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update2)(mvc3Main->mpCollision);
+       ((void* (__fastcall*)(void*))mvc3Main->mpCollision->vtable->update2)(mvc3Main->mpCollision);
     
+        
         if (onAdvanceFrameComplete != nullptr) {
+            printf("Reporting frame advance complete\n");
             onAdvanceFrameComplete();
         }
         return;
-    }
-
-    void updateSavedState(sMvc3Main* mvc3Main) {
-
-        sMvc3Manager * manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        memcpy(&state.sChar, manager->mpCharacter, sizeof(state.sChar));
     }
 
     void ReOrderedFrame(sMvc3Main* mvc3Main) {
@@ -572,8 +573,11 @@ namespace Mvc3FrameSimulation {
         case 3:
             ReOrderedFrame(param);
             return;
+        case 4:
+            ReOrderedFrame(param);
+            advanceFrame(param);
+            return;
         }
-        return;
     }
 
     void setToggleMode(int tm) {
@@ -594,6 +598,10 @@ namespace Mvc3FrameSimulation {
         nextInputP2 = input;
     }
 
+    void queueStateUpdate() {
+        doStateUpdate = true;
+    }
+
     void StartMatch() {
         do_not_start = 1;
         sBattleSetting* sBS;
@@ -607,12 +615,12 @@ namespace Mvc3FrameSimulation {
 
         //Should probably also wipe out the handicaps and damage settings but cba to figure out how
 
-        int characterId = 0x23;
+        int characterId = 0xf;
 
         ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[0]), characterId); // Set Characters
         sBS->characters[1].mBody = 0x02;
         sBS->characters[1].assist = 0x02;
-        sBS->characters[1].mType = characterId + 1;
+        sBS->characters[1].mType = characterId;
        // ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[1]), characterId);
         ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[2]), characterId + 2);
         ((void* (__fastcall*)(void*, int))_addr(0x140146560))(&(sBS->characters[3]), characterId + 3);
@@ -657,7 +665,9 @@ namespace Mvc3FrameSimulation {
         }
 
         if (nextInputP1 != -1 && teamId == 0) {
+            printf("Injecting input: %x", nextInputP1);
             character->mInput.On = nextInputP1;
+            character->mInput.mDat = nextInputP1;
             nextInputP1 = -1;
         }
         if (nextInputP2 != -1 && teamId == 1) {
@@ -667,12 +677,41 @@ namespace Mvc3FrameSimulation {
     }
 
     void AdvanceFrame() {
-        updateSavedState(getSMain());
+        sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+        ((void * (__fastcall*)(sAction*))_addr(0x140006d20))(action);
+       
         advanceFrame(getSMain());
     }
 
     Mvc3GameState* getState() {
-        return &state;
+        printf("Getting state\n");
+        Mvc3GameState* currentState = (Mvc3GameState*)malloc(sizeof(Mvc3GameState));
+
+        sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+
+        
+        memcpy(&currentState->sChar, manager->mpCharacter, sizeof(sCharacter));
+        memcpy(&currentState->c0, ((sCharacter*)manager->mpCharacter)->mTeam[0].point_char, sizeof(uCharacter));
+        memcpy(&currentState->action, action, sizeof(sAction));
+        return currentState;
+    }
+   
+    void setState(Mvc3GameState* state) {
+        printf("Setting state\n");
+
+        sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        sCharacter* sChar = (sCharacter*)manager->mpCharacter;
+        sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+
+
+
+        memcpy(manager->mpCharacter, &state->sChar, sizeof(sCharacter));
+
+        memcpy(sChar->mTeam[0].point_char, &state->c0, sizeof(uCharacter));
+        memcpy(action, &state->action, sizeof(sAction));
+
+        return;
     }
 
     int HookPostInputUpdate(uCharacter* character) {

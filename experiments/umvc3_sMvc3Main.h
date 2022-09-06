@@ -129,12 +129,13 @@ struct cChrInput {
     uCharacter* character;
     INT32 Old;
     INT32 On;
-    char pad[0x549]; 
+    INT32 Chg;
+    INT32 mDat;
+    char pad[0x541]; 
 };
 
-struct sCharacter {
-    char pad[0x4640];
-};
+
+
 
 struct uCharacter {
     char pad2[0x21c8];
@@ -145,6 +146,20 @@ struct uCharacter {
     INT32 mPlrId;
     INT32 mTeamId;
     INT32 mSettingId;
+    char pad3[0x3b37];
+};
+
+struct cChrTeam {
+    char pad[0x48];
+    uCharacter* point_char;
+    char pad2[0x270];
+};
+
+
+struct sCharacter {
+    char pad[0x40];
+    cChrTeam mTeam[2];
+    char pad2[0xc60];
 };
 
 
@@ -225,4 +240,5 @@ struct sAction {
     INT32 mStepTime2;
     INT32 mStepTimeWin;
     INT32 mStepFrame;
+    char pad2[0x15c];
 };
