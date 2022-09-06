@@ -154,6 +154,7 @@ namespace Mvc3FrameSimulation {
 
         // part 2
                     // Keyboards and mousesies
+
         Update30(mvc3Main->mpVibration);
         ((void* (__fastcall*)(void*))mvc3Main->mpNetPad->vtable->update)(mvc3Main->mpNetPad);
         Update30(mvc3Main->mpMouse);
@@ -679,9 +680,6 @@ namespace Mvc3FrameSimulation {
     }
 
     void AdvanceFrame() {
-        //sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
-        //((void * (__fastcall*)(sAction*))_addr(0x140006d20))(action);
-       
         advanceFrame(getSMain());
     }
 
@@ -707,6 +705,7 @@ namespace Mvc3FrameSimulation {
         sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
         sCharacter* sChar = (sCharacter*)manager->mpCharacter;
         sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+
 
 
 
