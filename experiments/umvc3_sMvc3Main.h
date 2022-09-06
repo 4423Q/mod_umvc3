@@ -19,7 +19,7 @@ struct sUnit_vtable {
 
 struct sUnit {
     sUnit_vtable* vtable;
-    char pad[0xc84];
+    char pad[0x676658];
 };
 
 struct sCollision_vtable {

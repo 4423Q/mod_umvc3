@@ -50,12 +50,15 @@ bool save_game_state(unsigned char** buffer, int* len, int* checksum, int)
 {
     printf("Saving 'game state'\n");
     *len = sizeof(Mvc3FrameSimulation::Mvc3GameState);
+    /*
      *buffer = (unsigned char*)malloc(*len);
     if (!*buffer) {
         printf("Err allocating mem\n");
         return false;
     }
-    memcpy(*buffer, Mvc3FrameSimulation::getState(), *len);
+    */
+    *buffer = (unsigned char*)Mvc3FrameSimulation::getState();
+    //memcpy(*buffer, Mvc3FrameSimulation::getState(), *len);
     *checksum = 1;
     return true;
 }

@@ -8,6 +8,7 @@ namespace Mvc3FrameSimulation {
 		uCharacter c0;
 		uCharacter c3;
 		sAction action;
+		//sUnit unit;
 	};
 
 	void setToggleMode(int toggleMode);

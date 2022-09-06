@@ -145,6 +145,7 @@ namespace Mvc3FrameSimulation {
         sPrimitive = ((void* (__fastcall*)())_addr(0x1401e0ca0))(); // get sPrimitive
         ((void* (__fastcall*)(void*, int))_addr(0x140447110))(sPrimitive, unknown.unknown2);
 
+
         Update48(mvc3Main->mpPrimitive);
         Update48(mvc3Main->mpGpuParticle);
         ((void* (__fastcall*)(void*))_addr(0x140537080))(mvc3Main->mpRender);
@@ -181,17 +182,17 @@ namespace Mvc3FrameSimulation {
         Update30(mvc3Main->mpScene);
         Update30(mvc3Main->mpShadow);
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        ((void* (__fastcall*)(void*))manager->vtable->update)(manager);
+        //manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        //((void* (__fastcall*)(void*))manager->vtable->update)(manager);
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        Update30(manager->mpCharacter);
+       // manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+       // Update30(manager->mpCharacter);
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        Update30(manager->mpStage);
+        //manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        //Update30(manager->mpStage);
 
-        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
-        Update30(manager->mpGameEffect);
+        //manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        //Update30(manager->mpGameEffect);
 
 
 
@@ -278,7 +279,24 @@ namespace Mvc3FrameSimulation {
         ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update3)(mvc3Main->mpUnit); // UI?
         ((void* (__fastcall*)(void*))mvc3Main->mpUnit->vtable->update2)(mvc3Main->mpUnit);
 
-        
+        //Added
+
+        manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+        ((void* (__fastcall*)(void*))manager->vtable->update)(manager);
+
+       manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+       Update30(manager->mpCharacter);
+
+
+       manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+       Update30(manager->mpStage);
+
+
+       manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
+       Update30(manager->mpGameEffect);
+
+       // 
+
         manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
         ((void* (__fastcall*)(void*))manager->mpShot->vtable->update)(manager->mpShot);
    
@@ -689,11 +707,13 @@ namespace Mvc3FrameSimulation {
 
         sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
         sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
-
-        
+        sUnit* unit = *reinterpret_cast<sUnit**>(_addr(0x140e17698));
+            
         memcpy(&currentState->sChar, manager->mpCharacter, sizeof(sCharacter));
         memcpy(&currentState->c0, ((sCharacter*)manager->mpCharacter)->mTeam[0].point_char, sizeof(uCharacter));
         memcpy(&currentState->c3, ((sCharacter*)manager->mpCharacter)->mTeam[1].point_char, sizeof(uCharacter));
+        //memcpy(&currentState->unit, unit, sizeof(sUnit));
+
 
         memcpy(&currentState->action, action, sizeof(sAction));
         return currentState;
@@ -705,6 +725,7 @@ namespace Mvc3FrameSimulation {
         sMvc3Manager* manager = ((sMvc3Manager * (__fastcall*)())_addr(0x140001af0))();
         sCharacter* sChar = (sCharacter*)manager->mpCharacter;
         sAction* action = *reinterpret_cast<sAction**>(_addr(0x140d47e68));
+        sUnit* unit = *reinterpret_cast<sUnit**>(_addr(0x140e17698));
 
 
 
@@ -715,6 +736,7 @@ namespace Mvc3FrameSimulation {
 
         memcpy(sChar->mTeam[1].point_char, &state->c3, sizeof(uCharacter));
         memcpy(action, &state->action, sizeof(sAction));
+        //memcpy(unit, &state->unit, sizeof(sUnit));
 
         return;
     }
