@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mod_enable_damage_counter",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "experiments", "experiments\experiments.vcxproj", "{7D08BBA2-7FDA-4FEE-A71C-6BA68A4BA962}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mod_improved_input_display", "improved_input_display\improved_input_display.vcxproj", "{268B3385-A45D-4604-A476-89229933EF09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{7D08BBA2-7FDA-4FEE-A71C-6BA68A4BA962}.Release|x64.Build.0 = Release|x64
 		{7D08BBA2-7FDA-4FEE-A71C-6BA68A4BA962}.Release|x86.ActiveCfg = Release|Win32
 		{7D08BBA2-7FDA-4FEE-A71C-6BA68A4BA962}.Release|x86.Build.0 = Release|Win32
+		{268B3385-A45D-4604-A476-89229933EF09}.Debug|x64.ActiveCfg = Debug|x64
+		{268B3385-A45D-4604-A476-89229933EF09}.Debug|x64.Build.0 = Debug|x64
+		{268B3385-A45D-4604-A476-89229933EF09}.Debug|x86.ActiveCfg = Debug|Win32
+		{268B3385-A45D-4604-A476-89229933EF09}.Debug|x86.Build.0 = Debug|Win32
+		{268B3385-A45D-4604-A476-89229933EF09}.Release|x64.ActiveCfg = Release|x64
+		{268B3385-A45D-4604-A476-89229933EF09}.Release|x64.Build.0 = Release|x64
+		{268B3385-A45D-4604-A476-89229933EF09}.Release|x86.ActiveCfg = Release|Win32
+		{268B3385-A45D-4604-A476-89229933EF09}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
