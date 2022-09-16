@@ -169,7 +169,7 @@
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
     <ClInclude Include="MemoryMgr.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="resource1.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Trampoline.h" />
     <ClInclude Include="umvc3utils.h" />
   </ItemGroup>
@@ -200,7 +200,7 @@
     <None Include="kiero\minhook\dll_resources\MinHook.def" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="icons.rc" />
+    <ResourceCompile Include="improved_input_delay.rc" />
     <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

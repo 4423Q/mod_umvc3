@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by icons.rc
+// Used by improved_input_delay.rc
 //
 #define IDB_PNG1                        101
 

@@ -5,7 +5,7 @@
 #include "Trampoline.h"
 #include "MemoryMgr.h"
 #include "icon_data.h"
-#include "resource1.h"
+#include "resource.h"
 using namespace Memory::VP;
 using namespace std;
 
@@ -102,12 +102,16 @@ namespace InputDisplay {
 		
 		//HRESULT res = D3DXCreateTextureFromFileInMemoryEx(pDevice, &icon_data, sizeof(icon_data), ICON_FRAME_WIDTH * ICON_FRAME_COUNT, ICON_FRAME_HEIGHT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, D3DCOLOR_ARGB(255, 255, 0, 255), nullptr, nullptr, &iconsTexture);
 
+		/*
 		HRSRC hResource = FindResource(nullptr, MAKEINTRESOURCE(IDB_PNG1), L"PNG");
 		if (hResource == NULL) {
 			error += "Error finding resource... ";
 		}
+		*/
 
-		HRESULT res = D3DXCreateTextureFromResource(pDevice, hMod, MAKEINTRESOURCE(IDB_PNG1), &iconsTexture);
+		HRESULT res = D3DXCreateTexture(pDevice, ICON_FRAME_WIDTH, ICON_FRAME_HEIGHT * ICON_FRAME_COUNT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &iconsTexture);
+		//HRESULT res = D3DXCreateTextureFromResource(pDevice, hMod, MAKEINTRESOURCE(IDB_PNG1), &iconsTexture);
+		//HRESULT res = D3DXCreateTextureFromFileInMemory(pDevice, &icon_data, sizeof(icon_data), &iconsTexture);
 		if (res != D3D_OK) {
 			switch (res) {
 				case D3DERR_NOTAVAILABLE:
@@ -125,6 +129,14 @@ namespace InputDisplay {
 			}
 			
 		}
+
+		D3DLOCKED_RECT rect;
+		iconsTexture->LockRect(0, &rect, 0, D3DLOCK_DISCARD);
+		unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
+		memcpy(dest, &icon_data[0], sizeof(icon_data));
+		iconsTexture->UnlockRect(0);
+
+
 		D3DXCreateSprite(pDevice, &iconsSprite);
 
 		Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
