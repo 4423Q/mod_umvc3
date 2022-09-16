@@ -13,6 +13,7 @@ EndScene oEndScene = NULL;
 
 WNDPROC oWndProc;
 static HWND window = NULL;
+HMODULE module = NULL;
 
 bool CheckGame()
 {
@@ -60,7 +61,7 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
         pDevice->GetCreationParameters(&params);
         window = params.hFocusWindow;
         oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
-        InputDisplay::init(pDevice);
+        InputDisplay::init(pDevice, module);
         init = true;
     }
 
@@ -102,6 +103,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
         if (CheckGame()) {
+            module = hModule;
             DisableThreadLibraryCalls(hModule);
             CreateThread(nullptr, 0, MainThread, hModule, 0, nullptr);
             CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)HookUpdate, hModule, 0, nullptr);

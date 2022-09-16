@@ -4,7 +4,7 @@
 
 
 namespace InputDisplay {
-	void init(LPDIRECT3DDEVICE9 pDevice);
+	void init(LPDIRECT3DDEVICE9 pDevice, HMODULE hMod);
 	void drawFrame();
 
 }

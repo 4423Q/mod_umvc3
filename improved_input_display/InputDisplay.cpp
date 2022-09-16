@@ -4,6 +4,8 @@
 #include <string>
 #include "Trampoline.h"
 #include "MemoryMgr.h"
+#include "icon_data.h"
+#include "resource1.h"
 using namespace Memory::VP;
 using namespace std;
 
@@ -48,6 +50,9 @@ namespace InputDisplay {
 
 	LPD3DXFONT m_font = NULL;
 	LPDIRECT3DDEVICE9 device = NULL;
+	LPDIRECT3DTEXTURE9 iconsTexture = NULL;
+	LPD3DXSPRITE iconsSprite = NULL;
+
 	int base_y = 230;
 	int base_x = 50;
 
@@ -61,6 +66,7 @@ namespace InputDisplay {
 	int buffer_index = 0;
 	int max_buffer_size = 12;
 
+	string error;
 
 
 	int framecount = 0;
@@ -85,7 +91,7 @@ namespace InputDisplay {
 	}
 
 
-	void init(LPDIRECT3DDEVICE9 pDevice)
+	void init(LPDIRECT3DDEVICE9 pDevice, HMODULE hMod)
 	{
 		for (int i = 0; i < max_buffer_size; i++) {
 			buffer[i] = { -1, -1 };
@@ -93,10 +99,49 @@ namespace InputDisplay {
 		device = pDevice;
 		D3DXCreateLine(pDevice, &line);
 		D3DXCreateFontW(pDevice, 20, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"), &m_font);
+		
+		//HRESULT res = D3DXCreateTextureFromFileInMemoryEx(pDevice, &icon_data, sizeof(icon_data), ICON_FRAME_WIDTH * ICON_FRAME_COUNT, ICON_FRAME_HEIGHT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, D3DCOLOR_ARGB(255, 255, 0, 255), nullptr, nullptr, &iconsTexture);
+
+		HRSRC hResource = FindResource(nullptr, MAKEINTRESOURCE(IDB_PNG1), L"PNG");
+		if (hResource == NULL) {
+			error += "Error finding resource... ";
+		}
+
+		HRESULT res = D3DXCreateTextureFromResource(pDevice, hMod, MAKEINTRESOURCE(IDB_PNG1), &iconsTexture);
+		if (res != D3D_OK) {
+			switch (res) {
+				case D3DERR_NOTAVAILABLE:
+					error += "ERror: notavailable";
+					break;
+				case D3DERR_INVALIDCALL:
+					error += "Error: invalidcall";
+					break;
+				case D3DXERR_INVALIDDATA:
+					error += "Error: invalidData";
+					break;
+				default:
+					error += "Other error?" + to_string(res);
+
+			}
+			
+		}
+		D3DXCreateSprite(pDevice, &iconsSprite);
+
 		Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
 		InjectHook(_addr(0x1402f9c36), tramp->Jump(HookInput), PATCH_CALL);
 	}
 
+	void drawError() {
+
+		RECT rct;
+		rct.left = 50;
+		rct.right = 1000;
+		rct.top = 50;
+		rct.bottom = 300;
+		D3DCOLOR fontColour = D3DCOLOR_ARGB(255, 255, 255, 255);
+		m_font->DrawTextA(NULL, error.c_str(), -1, &rct, 0, fontColour);
+
+	}
 
 	void drawText(string text, int x, int y, bool enabled) {
 	
@@ -141,6 +186,20 @@ namespace InputDisplay {
 
 	void drawFrame()
 	{
+		drawError();
+
+		RECT rct;
+		rct.left = 0;
+		rct.right = 100;
+		rct.top = 0;
+		rct.bottom = 100;
+		iconsSprite->Begin(D3DXSPRITE_ALPHABLEND);
+		D3DXVECTOR3 centre = D3DXVECTOR3(0, 0, 0);
+		D3DXVECTOR3 position = D3DXVECTOR3(100, 100, 0);
+
+		iconsSprite->Draw(iconsTexture, &rct, &centre, &position, D3DCOLOR_RGBA(255, 255, 255, 255));
+		iconsSprite->End();
+
 
 		line->SetWidth(200);
 		line->Begin();
