@@ -63,6 +63,9 @@
     <ClInclude Include="InputDisplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Trampoline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

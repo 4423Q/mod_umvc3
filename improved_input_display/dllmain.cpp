@@ -72,7 +72,7 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
 void WINAPI HookUpdate()
 {
-    InputDisplay::run();
+    //InputDisplay::run();
 }
 
 
