@@ -1,13 +1,9 @@
 #include "InputDisplay.h"
 #include <d3dx9core.h>
-#include "umvc3utils.h"
 #include <string>
-#include "Trampoline.h"
-#include "MemoryMgr.h"
 #include "icon_data.h"
 #include "icon_numbers.h"
 #include "resource.h"
-using namespace Memory::VP;
 using namespace std;
 
 
@@ -83,11 +79,6 @@ namespace InputDisplay {
 		}
 	}
 
-	void HookInput(void* whatever, int input)
-	{
-		sendInput(input);
-		return;
-	}
 
 	INT32 rearrangeColour(INT32 colour) {
 		if (colour == 0xFFFF00FF)
@@ -137,8 +128,7 @@ namespace InputDisplay {
 		D3DXCreateSprite(pDevice, &iconsSprite);
 		D3DXCreateSprite(pDevice, &iconNumbersSprite);
 
-		Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
-		InjectHook(_addr(0x1402f9c36), tramp->Jump(HookInput), PATCH_CALL);
+		
 	}
 
 	void drawError() {

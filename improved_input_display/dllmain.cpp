@@ -5,6 +5,7 @@
 #include "includes.h"
 #include "InputDisplay.h"
 #include <d3d9.h>
+#include "Trampoline.h"
 #pragma comment(lib, "d3dx9.lib")
 using namespace Memory::VP;
 
@@ -51,6 +52,13 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 
 
+void HookInput(void* whatever, int input)
+{
+    InputDisplay::sendInput(input);
+    return;
+}
+
+
 
 bool init = false;
 long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
@@ -62,6 +70,8 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
         window = params.hFocusWindow;
         oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
         InputDisplay::init(pDevice, module);
+        Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
+        InjectHook(_addr(0x1402f9c36), tramp->Jump(HookInput), PATCH_CALL);
         init = true;
     }
 
