@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="icon_data.h" />
+    <ClInclude Include="icon_numbers.h" />
     <ClInclude Include="InputDisplay.h" />
     <ClInclude Include="includes.h" />
     <ClInclude Include="kiero\kiero.h" />

@@ -5,6 +5,7 @@
 #include "Trampoline.h"
 #include "MemoryMgr.h"
 #include "icon_data.h"
+#include "icon_numbers.h"
 #include "resource.h"
 using namespace Memory::VP;
 using namespace std;
@@ -52,19 +53,15 @@ namespace InputDisplay {
 	LPDIRECT3DDEVICE9 device = NULL;
 	LPDIRECT3DTEXTURE9 iconsTexture = NULL;
 	LPD3DXSPRITE iconsSprite = NULL;
+	LPDIRECT3DTEXTURE9 iconNumbersTexture = NULL;
+	LPD3DXSPRITE iconNumbersSprite = NULL;
 
 	int base_y = 230;
 	int base_x = 50;
 
-	LPD3DXLINE line = NULL;
-	D3DXVECTOR2 points[] = {
-		D3DXVECTOR2(base_x + 80, base_y - 20),
-		D3DXVECTOR2(base_x + 80, base_y + 640),
-	};
-
-	InputItem buffer[12];
+	InputItem buffer[20];
 	int buffer_index = 0;
-	int max_buffer_size = 12;
+	int max_buffer_size = 20;
 
 	string error;
 
@@ -73,21 +70,33 @@ namespace InputDisplay {
 	int current_input = 0;
 	int sleepytime = 0;
 
-
-	void HookInput(void* whatever, int input)
-	{
+	void sendInput(int input) {
 		framecount++;
 		if (input != current_input) {
 			InputItem newInput = { current_input, framecount };
 
 			buffer_index = (buffer_index + 1) % (max_buffer_size);
 			buffer[buffer_index] = newInput;
-			
+
 			current_input = input;
 			framecount = 0;
 		}
-	
+	}
+
+	void HookInput(void* whatever, int input)
+	{
+		sendInput(input);
 		return;
+	}
+
+	INT32 rearrangeColour(INT32 colour) {
+		if (colour == 0xFFFF00FF)
+			return 0x00000000; //Chroma key?
+		return
+			((colour & 0xFF000000)) |
+				((colour & 0x00FF0000) >> 16) |
+				((colour & 0x0000FF00)) |
+				((colour & 0x000000FF) << 16);
 	}
 
 
@@ -97,47 +106,36 @@ namespace InputDisplay {
 			buffer[i] = { -1, -1 };
 		}
 		device = pDevice;
-		D3DXCreateLine(pDevice, &line);
 		D3DXCreateFontW(pDevice, 20, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"), &m_font);
+
+
+		D3DXCreateTexture(pDevice, ICON_FRAME_WIDTH, ICON_FRAME_HEIGHT * ICON_FRAME_COUNT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &iconsTexture);
+		D3DXCreateTexture(pDevice, ICON_NUMBERS_FRAME_WIDTH, ICON_NUMBERS_FRAME_HEIGHT * ICON_FRAME_COUNT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &iconNumbersTexture);
+
+		uint32_t* remapped_array = new uint32_t[ICON_FRAME_COUNT*ICON_FRAME_HEIGHT*ICON_FRAME_WIDTH];
 		
-		//HRESULT res = D3DXCreateTextureFromFileInMemoryEx(pDevice, &icon_data, sizeof(icon_data), ICON_FRAME_WIDTH * ICON_FRAME_COUNT, ICON_FRAME_HEIGHT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, D3DCOLOR_ARGB(255, 255, 0, 255), nullptr, nullptr, &iconsTexture);
 
-		/*
-		HRSRC hResource = FindResource(nullptr, MAKEINTRESOURCE(IDB_PNG1), L"PNG");
-		if (hResource == NULL) {
-			error += "Error finding resource... ";
-		}
-		*/
-
-		HRESULT res = D3DXCreateTexture(pDevice, ICON_FRAME_WIDTH, ICON_FRAME_HEIGHT * ICON_FRAME_COUNT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &iconsTexture);
-		//HRESULT res = D3DXCreateTextureFromResource(pDevice, hMod, MAKEINTRESOURCE(IDB_PNG1), &iconsTexture);
-		//HRESULT res = D3DXCreateTextureFromFileInMemory(pDevice, &icon_data, sizeof(icon_data), &iconsTexture);
-		if (res != D3D_OK) {
-			switch (res) {
-				case D3DERR_NOTAVAILABLE:
-					error += "ERror: notavailable";
-					break;
-				case D3DERR_INVALIDCALL:
-					error += "Error: invalidcall";
-					break;
-				case D3DXERR_INVALIDDATA:
-					error += "Error: invalidData";
-					break;
-				default:
-					error += "Other error?" + to_string(res);
-
-			}
-			
+		memcpy(remapped_array, &icon_data, sizeof(icon_data));
+		for (int j = 0; j < ICON_FRAME_HEIGHT * ICON_FRAME_WIDTH*ICON_FRAME_COUNT; j++) {
+			remapped_array[j] = rearrangeColour(remapped_array[j]);
 		}
 
 		D3DLOCKED_RECT rect;
 		iconsTexture->LockRect(0, &rect, 0, D3DLOCK_DISCARD);
 		unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-		memcpy(dest, &icon_data[0], sizeof(icon_data));
+		memcpy(dest, remapped_array,sizeof(icon_data));
 		iconsTexture->UnlockRect(0);
+
+		D3DLOCKED_RECT rect2;
+		iconNumbersTexture->LockRect(0, &rect2, 0, D3DLOCK_DISCARD);
+		unsigned char* dest2 = static_cast<unsigned char*>(rect2.pBits);
+		memcpy(dest2, &icon_numbers_data, sizeof(icon_numbers_data));
+		iconNumbersTexture->UnlockRect(0);
+
 
 
 		D3DXCreateSprite(pDevice, &iconsSprite);
+		D3DXCreateSprite(pDevice, &iconNumbersSprite);
 
 		Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
 		InjectHook(_addr(0x1402f9c36), tramp->Jump(HookInput), PATCH_CALL);
@@ -176,62 +174,151 @@ namespace InputDisplay {
 		m_font->DrawTextA(NULL, text.c_str(), -1, &rct, 0, fontColour);
 	}
 
+
+	enum IconType {
+		ICONTYPE_BLANK,
+		ICONTYPE_H,
+		ICONTYPE_S,
+		ICONTYPE_L,
+		ICONTYPE_M,
+		ICONTYPE_A1,
+		ICONTYPE_A2,
+		ICONTYPE_D,
+		ICONTYPE_RIGHT,
+		ICONTYPE_U,
+		ICONTYPE_LEFT,
+		ICONTYPE_DLEFT,
+		ICONTYPE_DRIGHT,
+		ICONTYPE_URIGHT,
+		ICONTYPE_ULEFT
+	};
+
+	void drawButtonIcon(IconType iconType, float x, float y, bool enabled) {
+		float iconIndex = iconType;
+		
+		RECT rct;
+		rct.left = 0;
+		rct.right = 16;
+		rct.top = iconIndex * 16;
+		rct.bottom = (iconIndex+1) * 16;
+		D3DXVECTOR3 centre = D3DXVECTOR3(0, 0, 0);
+		D3DXVECTOR3 position = D3DXVECTOR3(x, y, 0);
+
+		int brightness = enabled ? 255 : 40;
+		iconsSprite->Draw(iconsTexture, &rct, &centre, &position, D3DCOLOR_RGBA(brightness, brightness, brightness, 255));
+	}
+
+	void drawDigit(int digit, float x, float y) {
+		int offset = digit % 10;
+		RECT rct;
+		rct.left = 0;
+		rct.right = ICON_NUMBERS_FRAME_WIDTH;
+		rct.top = offset * ICON_NUMBERS_FRAME_HEIGHT;
+		rct.bottom = (offset+1) * ICON_NUMBERS_FRAME_HEIGHT;
+		D3DXVECTOR3 centre = D3DXVECTOR3(0, 0, 0);
+		D3DXVECTOR3 position = D3DXVECTOR3(x, y, 0);
+		iconNumbersSprite->Draw(iconNumbersTexture, &rct, &centre, &position, D3DCOLOR_RGBA(255,255,255, 255));
+	}
+
+	void drawNumber(int number, float x, float y) {
+		float sep = ICON_NUMBERS_FRAME_WIDTH;
+		if (number <= 9) {
+			drawDigit(number, x, y);
+			return;
+		}
+		if (number <= 99) {
+			drawDigit(number / 10, x, y);
+			drawDigit(number % 10, x + sep, y);
+			return;
+		}
+		if (number <= 999) {
+			drawDigit(number / 100, x, y);
+			drawDigit((number / 10) % 10, x + sep, y);
+			drawDigit(number % 10, x + sep * 2, y);
+			return;
+		}
+		if (number <= 9999) {
+			drawDigit(number / 1000, x, y);
+			drawDigit((number / 100) % 10, x + sep, y);
+			drawDigit((number / 10) % 10, x + sep * 2, y);
+			drawDigit(number % 10, x + sep * 3, y);
+			return;
+		}
+		drawDigit(9, x, y);
+		drawDigit(9, x + sep, y);
+		drawDigit(9, x + sep * 2, y);
+		drawDigit(9, x + sep * 3, y);
+	}
+
 	void drawItem(InputItem item, int x, int y) {
 
 		int input = item.input;
 		int sep = 20;
 
-
-		drawText("<", x , y + sep/2, input & 0x2);
-		drawText("v", x + sep/2, y + sep, input & 0x8);
-		drawText(">", x + sep, y + sep/2, input & 0x1);
-		drawText("^", x + sep/2, y, input & 0x4);
+		int arrow_x = x;
+		int arrow_y = y + sep / 2;
+			
+			switch (input & 0x0000000f) {
+			case 0x1:
+				drawButtonIcon(ICONTYPE_RIGHT, arrow_x, arrow_y, true);
+				break;
+			case 0x2:
+				drawButtonIcon(ICONTYPE_LEFT, arrow_x, arrow_y, true);
+				break;
+			case 0x4:
+				drawButtonIcon(ICONTYPE_U, arrow_x, arrow_y, true);
+				break;
+			case 0x8:
+				drawButtonIcon(ICONTYPE_D, arrow_x, arrow_y, true);
+				break;
+			case 0x4 | 0x1:
+				drawButtonIcon(ICONTYPE_URIGHT, arrow_x, arrow_y, true);
+				break;
+			case 0x4 | 0x2:
+				drawButtonIcon(ICONTYPE_ULEFT, arrow_x, arrow_y, true);
+				break;
+			case 0x8 | 0x1:
+				drawButtonIcon(ICONTYPE_DRIGHT, arrow_x, arrow_y, true);
+				break;
+			case 0x8 | 0x2:
+				drawButtonIcon(ICONTYPE_DLEFT, arrow_x, arrow_y, true);
+				break;
+			}
 		
-		drawText("L", x + sep * 3, y, input & 0x10);
-		drawText("M", x + sep * 4, y, input & 0x20);
-		drawText("H", x + sep * 5, y, input & 0x40);
-		drawText("S", x + sep * 3, y + sep, input & 0x80);
-		drawText("1", x + sep * 4, y + sep, input & 0x100);
-		drawText("2", x + sep * 5, y + sep, input & 0x200);
-		drawText(to_string(item.frames), x + sep * 7, y + sep/2, true);
+		drawButtonIcon(ICONTYPE_L, x + sep * 2, y, input & 0x10);
+		drawButtonIcon(ICONTYPE_M, x + sep * 3, y, input & 0x20);
+		drawButtonIcon(ICONTYPE_H, x + sep * 4, y, input & 0x40);
+		drawButtonIcon(ICONTYPE_S, x + sep * 2, y + sep, input & 0x80);
+		drawButtonIcon(ICONTYPE_A1, x + sep * 3, y + sep, input & 0x100);
+		drawButtonIcon(ICONTYPE_A2, x + sep * 4, y + sep, input & 0x200);
+		drawNumber(item.frames, x + sep * 5 + 4, y + 4);
 	}
 
 	void drawFrame()
 	{
 		drawError();
 
-		RECT rct;
-		rct.left = 0;
-		rct.right = 100;
-		rct.top = 0;
-		rct.bottom = 100;
 		iconsSprite->Begin(D3DXSPRITE_ALPHABLEND);
-		D3DXVECTOR3 centre = D3DXVECTOR3(0, 0, 0);
-		D3DXVECTOR3 position = D3DXVECTOR3(100, 100, 0);
+		iconNumbersSprite->Begin(D3DXSPRITE_ALPHABLEND);
 
-		iconsSprite->Draw(iconsTexture, &rct, &centre, &position, D3DCOLOR_RGBA(255, 255, 255, 255));
-		iconsSprite->End();
-
-
-		line->SetWidth(200);
-		line->Begin();
-		line->Draw(points, 2, D3DCOLOR_RGBA(40, 40, 80, 170));
-		line->End();
-
+		int num_to_draw = 14;
 		InputItem current = { current_input, framecount };
 		drawItem(current, 50, base_y);
 
-			for (int i = 0; i < max_buffer_size; ++i) {
+			for (int i = 0; i < num_to_draw; ++i) {
 				int index = buffer_index - i;
 				if (index < 0) {
 					index = max_buffer_size + index;
 				}
 				InputItem item = buffer[index];
 				if (item.input != -1) {
-					drawItem(item, 50, base_y + 50 * (i + 1));
+					drawItem(item, 50, base_y + 40 * (i + 1));
 				}
 			}
-	
+
+			iconNumbersSprite->End();
+		iconsSprite->End();
+
 	}
 
 	
