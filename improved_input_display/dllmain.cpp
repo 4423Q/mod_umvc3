@@ -10,6 +10,28 @@
 using namespace Memory::VP;
 
 
+struct sBattleSetting {
+    void* vtable;
+    char pad[0x30];
+    struct character {
+        void* vtable;
+        INT32 mTeam;
+        INT32 mType;
+        INT32 unknown;
+        INT32 mBody;
+        INT32 mCpu;
+        INT32 assist;
+        char pad[0x38];
+    };
+    character characters[6];
+    char pad2[0x104];
+    INT32 battle_type;
+    char pad3[0x21];
+    char input_key_disp;
+};
+
+
+
 EndScene oEndScene = NULL;
 
 WNDPROC oWndProc;
@@ -77,13 +99,12 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
 
     InputDisplay::drawFrame();
 
+    sBattleSetting* battleSetting = *reinterpret_cast<sBattleSetting**>(_addr(0x140d50e58));
+    if (battleSetting->battle_type != 5 || battleSetting->input_key_disp == 0) {
+        InputDisplay::setActive(false);
+    }
+
     return oEndScene(pDevice);
-}
-
-
-void WINAPI HookUpdate()
-{
-    //InputDisplay::run();
 }
 
 
@@ -116,7 +137,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             module = hModule;
             DisableThreadLibraryCalls(hModule);
             CreateThread(nullptr, 0, MainThread, hModule, 0, nullptr);
-            CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)HookUpdate, hModule, 0, nullptr);
         }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:

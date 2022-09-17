@@ -9,37 +9,6 @@ using namespace std;
 
 namespace InputDisplay {
 
-	struct sBattleSetting {
-		void* vtable;
-		char pad[0x30];
-		struct character {
-			void* vtable;
-			INT32 mTeam;
-			INT32 mType;
-			INT32 unknown;
-			INT32 mBody;
-			INT32 mCpu;
-			INT32 assist;
-			char pad[0x38];
-		};
-		character characters[6];
-		char pad2[0x104];
-		INT32 battle_type;
-		char pad3[0x21];
-		char input_key_disp;
-	};
-
-	struct sRender {
-		char pad[0xf8];
-		LPHANDLE other_event_handle;
-		LPHANDLE render_event_handle;
-	};
-
-	struct sMain {
-		char pad[0xc6];
-		LPHANDLE semaphore_handle;
-	};
-
 	struct InputItem {
 		int input;
 		int frames;
@@ -61,12 +30,14 @@ namespace InputDisplay {
 
 	string error;
 
+	bool active = false;
 
 	int framecount = 0;
 	int current_input = 0;
 	int sleepytime = 0;
 
 	void sendInput(int input) {
+		active = true;
 		framecount++;
 		if (input != current_input) {
 			InputItem newInput = { current_input, framecount };
@@ -77,6 +48,10 @@ namespace InputDisplay {
 			current_input = input;
 			framecount = 0;
 		}
+	}
+
+	void setActive(bool a) {
+		active = a;
 	}
 
 
@@ -286,7 +261,13 @@ namespace InputDisplay {
 
 	void drawFrame()
 	{
+
+		if (!active) {
+			return;
+		}
+
 		drawError();
+
 
 		iconsSprite->Begin(D3DXSPRITE_ALPHABLEND);
 		iconNumbersSprite->Begin(D3DXSPRITE_ALPHABLEND);
@@ -295,18 +276,18 @@ namespace InputDisplay {
 		InputItem current = { current_input, framecount };
 		drawItem(current, 50, base_y);
 
-			for (int i = 0; i < num_to_draw; ++i) {
-				int index = buffer_index - i;
-				if (index < 0) {
-					index = max_buffer_size + index;
-				}
-				InputItem item = buffer[index];
-				if (item.input != -1) {
-					drawItem(item, 50, base_y + 40 * (i + 1));
-				}
+		for (int i = 0; i < num_to_draw; ++i) {
+			int index = buffer_index - i;
+			if (index < 0) {
+				index = max_buffer_size + index;
 			}
+			InputItem item = buffer[index];
+			if (item.input != -1) {
+				drawItem(item, 50, base_y + 40 * (i + 1));
+			}
+		}
 
-			iconNumbersSprite->End();
+		iconNumbersSprite->End();
 		iconsSprite->End();
 
 	}
