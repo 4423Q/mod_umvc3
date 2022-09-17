@@ -21,8 +21,8 @@ namespace InputDisplay {
 	LPDIRECT3DTEXTURE9 iconNumbersTexture = NULL;
 	LPD3DXSPRITE iconNumbersSprite = NULL;
 
-	int base_y = 230;
-	int base_x = 50;
+	float base_y = 234;
+	float base_x = 50;
 
 	InputItem buffer[20];
 	int buffer_index = 0;
@@ -66,7 +66,7 @@ namespace InputDisplay {
 	}
 
 
-	void init(LPDIRECT3DDEVICE9 pDevice, HMODULE hMod)
+	void init(LPDIRECT3DDEVICE9 pDevice, int width)
 	{
 		for (int i = 0; i < max_buffer_size; i++) {
 			buffer[i] = { -1, -1 };
@@ -75,21 +75,21 @@ namespace InputDisplay {
 		D3DXCreateFontW(pDevice, 20, 0, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"), &m_font);
 
 
-		D3DXCreateTexture(pDevice, ICON_FRAME_WIDTH, ICON_FRAME_HEIGHT * ICON_FRAME_COUNT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &iconsTexture);
-		D3DXCreateTexture(pDevice, ICON_NUMBERS_FRAME_WIDTH, ICON_NUMBERS_FRAME_HEIGHT * ICON_FRAME_COUNT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &iconNumbersTexture);
+		D3DXCreateTexture(pDevice, ICONS_FRAME_WIDTH, ICONS_FRAME_HEIGHT * ICONS_FRAME_COUNT, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &iconsTexture);
+		D3DXCreateTexture(pDevice, ICON_NUMBERS_FRAME_WIDTH, ICON_NUMBERS_FRAME_HEIGHT * ICON_NUMBERS_FRAME_COUNT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &iconNumbersTexture);
 
-		uint32_t* remapped_array = new uint32_t[ICON_FRAME_COUNT*ICON_FRAME_HEIGHT*ICON_FRAME_WIDTH];
+		uint32_t* remapped_array = new uint32_t[ICONS_FRAME_COUNT*ICONS_FRAME_HEIGHT*ICONS_FRAME_WIDTH];
 		
 
-		memcpy(remapped_array, &icon_data, sizeof(icon_data));
-		for (int j = 0; j < ICON_FRAME_HEIGHT * ICON_FRAME_WIDTH*ICON_FRAME_COUNT; j++) {
+		memcpy(remapped_array, &icons_data, sizeof(icons_data));
+		for (int j = 0; j < ICONS_FRAME_HEIGHT * ICONS_FRAME_WIDTH*ICONS_FRAME_COUNT; j++) {
 			remapped_array[j] = rearrangeColour(remapped_array[j]);
 		}
 
 		D3DLOCKED_RECT rect;
 		iconsTexture->LockRect(0, &rect, 0, D3DLOCK_DISCARD);
 		unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-		memcpy(dest, remapped_array,sizeof(icon_data));
+		memcpy(dest, remapped_array,sizeof(icons_data));
 		iconsTexture->UnlockRect(0);
 
 		D3DLOCKED_RECT rect2;
@@ -102,6 +102,19 @@ namespace InputDisplay {
 
 		D3DXCreateSprite(pDevice, &iconsSprite);
 		D3DXCreateSprite(pDevice, &iconNumbersSprite);
+
+		const float scaleFactor = width / 1650.f;
+
+
+		const D3DXMATRIX scale = {
+			scaleFactor,               0.0f,            0.0f,            0.0f,
+			0.0f,            scaleFactor,               0.0f,            0.0f,
+			0.0f,            0.0f,            1.0f,               0.0f,
+			0.0f,            0.0f,            0.0f,            1.0f
+		};
+
+		iconNumbersSprite->SetTransform(&scale);
+		iconsSprite->SetTransform(&scale);
 
 		
 	}
@@ -159,13 +172,13 @@ namespace InputDisplay {
 	};
 
 	void drawButtonIcon(IconType iconType, float x, float y, bool enabled) {
-		float iconIndex = iconType;
+		LONG iconIndex = static_cast<LONG>(iconType);
 		
 		RECT rct;
-		rct.left = 0;
-		rct.right = 16;
-		rct.top = iconIndex * 16;
-		rct.bottom = (iconIndex+1) * 16;
+		rct.left = static_cast<LONG>(0.);
+		rct.right = static_cast<LONG>(ICONS_FRAME_WIDTH);
+		rct.top = iconIndex * static_cast<LONG>(ICONS_FRAME_HEIGHT);
+		rct.bottom = (iconIndex+static_cast<LONG>(1)) * static_cast<LONG>(ICONS_FRAME_HEIGHT);
 		D3DXVECTOR3 centre = D3DXVECTOR3(0, 0, 0);
 		D3DXVECTOR3 position = D3DXVECTOR3(x, y, 0);
 
@@ -176,11 +189,11 @@ namespace InputDisplay {
 	void drawDigit(int digit, float x, float y) {
 		int offset = digit % 10;
 		RECT rct;
-		rct.left = 0;
-		rct.right = ICON_NUMBERS_FRAME_WIDTH;
-		rct.top = offset * ICON_NUMBERS_FRAME_HEIGHT;
-		rct.bottom = (offset+1) * ICON_NUMBERS_FRAME_HEIGHT;
-		D3DXVECTOR3 centre = D3DXVECTOR3(0, 0, 0);
+		rct.left = static_cast<LONG>(0.f);
+		rct.right = static_cast<LONG>(ICON_NUMBERS_FRAME_WIDTH);
+		rct.top = static_cast<LONG>(offset) * ICON_NUMBERS_FRAME_HEIGHT;
+		rct.bottom = static_cast<LONG>(offset+1) * ICON_NUMBERS_FRAME_HEIGHT;
+		D3DXVECTOR3 centre = D3DXVECTOR3(0,0, 0);
 		D3DXVECTOR3 position = D3DXVECTOR3(x, y, 0);
 		iconNumbersSprite->Draw(iconNumbersTexture, &rct, &centre, &position, D3DCOLOR_RGBA(255,255,255, 255));
 	}
@@ -215,13 +228,13 @@ namespace InputDisplay {
 		drawDigit(9, x + sep * 3, y);
 	}
 
-	void drawItem(InputItem item, int x, int y) {
+	void drawItem(InputItem item, float x, float y) {
 
 		int input = item.input;
-		int sep = 20;
+		float sep = 20;
 
-		int arrow_x = x;
-		int arrow_y = y + sep / 2;
+		float arrow_x = x;
+		float arrow_y = y + sep / 2;
 			
 			switch (input & 0x0000000f) {
 			case 0x1:
@@ -253,9 +266,9 @@ namespace InputDisplay {
 		drawButtonIcon(ICONTYPE_L, x + sep * 2, y, input & 0x10);
 		drawButtonIcon(ICONTYPE_M, x + sep * 3, y, input & 0x20);
 		drawButtonIcon(ICONTYPE_H, x + sep * 4, y, input & 0x40);
-		drawButtonIcon(ICONTYPE_S, x + sep * 2, y + sep, input & 0x80);
-		drawButtonIcon(ICONTYPE_A1, x + sep * 3, y + sep, input & 0x100);
-		drawButtonIcon(ICONTYPE_A2, x + sep * 4, y + sep, input & 0x200);
+		drawButtonIcon(ICONTYPE_S, x + sep * 1.5, y + sep - 2, input & 0x80);
+		drawButtonIcon(ICONTYPE_A1, x + sep * 2.5, y + sep - 2, input & 0x100);
+		drawButtonIcon(ICONTYPE_A2, x + sep * 3.5, y + sep - 2, input & 0x200);
 		drawNumber(item.frames, x + sep * 5 + 4, y + 4);
 	}
 
@@ -267,14 +280,13 @@ namespace InputDisplay {
 		}
 
 		drawError();
-
-
+		
 		iconsSprite->Begin(D3DXSPRITE_ALPHABLEND);
 		iconNumbersSprite->Begin(D3DXSPRITE_ALPHABLEND);
 
 		int num_to_draw = 14;
 		InputItem current = { current_input, framecount };
-		drawItem(current, 50, base_y);
+		drawItem(current, base_x, base_y);
 
 		for (int i = 0; i < num_to_draw; ++i) {
 			int index = buffer_index - i;
@@ -283,7 +295,7 @@ namespace InputDisplay {
 			}
 			InputItem item = buffer[index];
 			if (item.input != -1) {
-				drawItem(item, 50, base_y + 40 * (i + 1));
+				drawItem(item, base_x, base_y + 40.f * (i + 1));
 			}
 		}
 

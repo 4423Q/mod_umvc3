@@ -30,7 +30,11 @@ struct sBattleSetting {
     char input_key_disp;
 };
 
-
+struct sRender {
+    char pad[0xd8];
+    int screen_width;
+    int screen_height;
+};
 
 EndScene oEndScene = NULL;
 
@@ -91,7 +95,8 @@ long __stdcall hkEndScene(LPDIRECT3DDEVICE9 pDevice)
         pDevice->GetCreationParameters(&params);
         window = params.hFocusWindow;
         oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
-        InputDisplay::init(pDevice, module);
+        sRender* renderInfo = *reinterpret_cast<sRender**>(_addr(0x140e179a8));
+        InputDisplay::init(pDevice, renderInfo->screen_width);
         Trampoline* tramp = Trampoline::MakeTrampoline(GetModuleHandle(nullptr));
         InjectHook(_addr(0x1402f9c36), tramp->Jump(HookInput), PATCH_CALL);
         init = true;
