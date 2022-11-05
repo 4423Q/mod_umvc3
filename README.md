@@ -8,6 +8,9 @@ Relies heavily on https://github.com/CookiePLMonster/ModUtils and https://github
 
 [mod_enable_damage_counter](./mod_enable_damage_counter) - Re-enables the beta combo counter with damage display
 
+[mod_toggle_hud](./mod_toggle_hud) - Makes the HUD toggle-able in game
+
+
 ## Problems
 
 If you've got problems with a mod add a github issue and I'll have a look when I've got some time.
